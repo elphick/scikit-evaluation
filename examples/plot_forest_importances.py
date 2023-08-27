@@ -28,7 +28,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.ensemble import RandomForestClassifier
 
-from elphick.scikit_evaluation.features import plot_feature_importance, FeatureImportance
+from elphick.sklearn_viz.features import plot_feature_importance, FeatureImportance
 import logging
 
 logging.basicConfig(level=logging.DEBUG,

@@ -6,7 +6,7 @@ Plots can be generated with either a convenience function or via an object.
 
 ..  code-block:: python
 
-    from elphick.scikit_evaluation.features import plot_feature_importance, FeatureImportance
+    from elphick.sklearn_viz.features import plot_feature_importance, FeatureImportance
 
 Using a function is simple:
 

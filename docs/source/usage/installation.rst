@@ -10,13 +10,13 @@ The package is pip installable.
 
 ..  code-block::
 
-    pip install scikit-evaluation
+    pip install sklearn-viz
 
 
 Or, if poetry is more your flavour.
 
 ..  code-block::
 
-    poetry add scikit-evaluation
+    poetry add sklearn-viz
 
 

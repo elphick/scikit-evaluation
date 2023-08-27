@@ -1,4 +1,4 @@
-Welcome to scikit-evaluation's documentation!
+Welcome to sklearn-viz's documentation!
 =============================================
 
 .. include:: ../../README.md

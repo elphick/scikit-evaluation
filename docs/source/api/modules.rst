@@ -1,7 +1,7 @@
 API Reference
 =============
 
-.. automodule:: elphick.scikit_evaluation
+.. automodule:: elphick.sklearn_viz
    :members:
 
 .. autosummary::

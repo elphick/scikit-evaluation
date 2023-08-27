@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "scikit-evaluation"
+name = "sklearn-viz"
 version = "0.1.0"
 description = ""
 authors = ["Greg <11791585+elphick@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{ include = "elphick/scikit_evaluation" }]
+packages = [{ include = "elphick/sklearn_viz" }]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"

@@ -1,4 +1,4 @@
-# scikit-evaluation
+# sklearn-viz
 
 This package provides a collection of interactive (plotly) plots to facilitate scikit-learn model evaluation.
 

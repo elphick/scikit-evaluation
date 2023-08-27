@@ -9,7 +9,7 @@ from sklearn.inspection import permutation_importance
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_is_fitted
 
-from elphick.scikit_evaluation.utils import log_timer
+from elphick.sklearn_viz.utils import log_timer
 
 
 def plot_feature_importance(mdl,
