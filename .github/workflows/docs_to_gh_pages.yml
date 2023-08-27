@@ -33,6 +33,7 @@ jobs:
           pip install kaleido
           pip install pytest
           pip install pandas
+          pip install scikit-learn
       - name: Sphinx build
         run: |
           sphinx-build docs/source _build
