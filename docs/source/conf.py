@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'elphick-template'
+project = 'scikit-evaluation'
 copyright = '2023, Greg Elphick'
 author = 'Greg Elphick'
 

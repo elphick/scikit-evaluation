@@ -1,13 +1,13 @@
 API Reference
 =============
 
-.. automodule:: namespace.package
+.. automodule:: elphick.scikit_evaluation
    :members:
 
 .. autosummary::
    :toctree: _autosummary
    :recursive:
 
-    module
+    features
 
 
