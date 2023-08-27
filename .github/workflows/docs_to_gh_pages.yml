@@ -32,6 +32,7 @@ jobs:
           pip install matplotlib
           pip install kaleido
           pip install pytest
+          pip install pandas
       - name: Sphinx build
         run: |
           sphinx-build docs/source _build
