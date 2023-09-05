@@ -24,6 +24,7 @@ jobs:
         pip install pytest
         pip install pandas
         pip install scikit-learn
+        pip install statsmodels
     - name: Sphinx build
       run: |
         sphinx-build docs/source _build
