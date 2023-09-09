@@ -9,5 +9,7 @@ API Reference
    :recursive:
 
     features
+    model_selection
+    residuals
 
 
