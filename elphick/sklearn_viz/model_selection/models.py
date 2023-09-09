@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression, LinearRegression, LassoCV, 
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 
 
 class ModelType(Enum):
@@ -30,7 +30,7 @@ class Models:
         self.LR_C = Model('LR', LogisticRegression(), ModelType.CLASSIFIER, True)
         self.LDA = Model('LDA', LinearDiscriminantAnalysis(), ModelType.CLASSIFIER, True)
         self.KNN = Model('KNN', KNeighborsClassifier(), ModelType.CLASSIFIER, True)
-        self.CART = Model('CART', DecisionTreeClassifier(), ModelType.CLASSIFIER, True)
+        self.CART_C = Model('CART', DecisionTreeClassifier(), ModelType.CLASSIFIER, True)
         self.NB = Model('NB', GaussianNB(), ModelType.CLASSIFIER, True)
         self.SVM = Model('SVM', SVC(), ModelType.CLASSIFIER, True)
         self.RF_C = Model('RF', RandomForestClassifier(), ModelType.REGRESSOR, False)
@@ -38,6 +38,7 @@ class Models:
         self.LASSO = Model('LASSO', LassoCV(), ModelType.REGRESSOR, True)
         self.RIDGE = Model('RIDGE', RidgeCV(), ModelType.REGRESSOR, True)
         self.ELASTIC = Model('ELASTIC', ElasticNetCV(), ModelType.REGRESSOR, True)
+        self.CART_R = Model('CART', DecisionTreeRegressor(), ModelType.REGRESSOR, True)
         self.RF_R = Model('RF', RandomForestRegressor(), ModelType.REGRESSOR, False)
 
     def fast_classifiers(self) -> Dict:
