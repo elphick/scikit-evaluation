@@ -66,6 +66,7 @@ fig
 # ---------------------
 #
 # We pass in the test data for additional context, and calculate across 30 folds.
+# The test data score is plotted as an orange marker.
 
 ms: ModelSelection = ModelSelection(pipe, models=models_to_test, x_train=X_train, y_train=y_train,
                                     k_folds=30, x_test=X_test, y_test=y_test)
