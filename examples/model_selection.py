@@ -15,7 +15,8 @@ from typing import Dict
 import pandas
 import pandas as pd
 import plotly
-from sklearn.linear_model import LogisticRegression
+from sklearn.datasets import load_diabetes
+from sklearn.linear_model import LogisticRegression, RidgeCV
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -79,3 +80,29 @@ plotly.io.show(fig)  # this call to show will set the thumbnail for use in the g
 # View the data
 
 ms.data
+
+# %%
+# Regressor Model Selection
+# -------------------------
+
+diabetes = load_diabetes(as_frame=True)
+X, y = diabetes.data, diabetes.target
+y.name = "progression"
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+pipe: Pipeline = make_pipeline(StandardScaler(), RidgeCV())
+models_to_test: Dict = Models().fast_regressors()
+pipe
+
+# %%
+
+fig = plot_model_selection(pipe, models=models_to_test,
+                           x_train=X_train, y_train=y_train)
+fig.update_layout(height=600)
+fig
+
+# %%
+fig = plot_model_selection(pipe, models=models_to_test,
+                           x_train=X_train, y_train=y_train, x_test=X_test, y_test=y_test)
+fig.update_layout(height=600)
+fig
