@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from sklearn import model_selection
 from sklearn.base import is_classifier, is_regressor
-from sklearn.metrics import mean_squared_error, accuracy_score
+from sklearn.metrics import mean_squared_error, accuracy_score, r2_score
 from sklearn.pipeline import Pipeline
 
 from elphick.sklearn_viz.utils import log_timer
@@ -76,7 +76,7 @@ class ModelSelection:
         self.is_pipeline: bool = isinstance(mdl, Pipeline)
         self.is_classifier: bool = is_classifier(mdl)
         self.is_regressor: bool = is_regressor(mdl)
-        self.scorer = None
+        self.scorer = 'accuracy' if self.is_classifier else 'r2'
 
         # check_is_fitted(mdl[-1]) if self.is_pipeline else check_is_fitted(mdl)
 
@@ -86,13 +86,6 @@ class ModelSelection:
         if self._data is not None:
             res = self._data
         else:
-
-            if self.is_regressor:
-                self.scorer = 'neg_mean_squared_error'
-            elif self.is_classifier:
-                self.scorer = 'accuracy'
-            else:
-                raise NotImplementedError("Only Classifers and Regressors are supported.")
 
             self._logger.info("Commencing Cross Validation")
             cv_chunks: List = []
@@ -113,7 +106,9 @@ class ModelSelection:
                 if self.X_test is not None and self.y_test is not None:
                     test_score: float = np.nan
                     if self.is_regressor:
-                        test_score = mean_squared_error(y_true=self.y_test, y_pred=mdl.predict(self.X_test))
+                        test_score = r2_score(y_true=self.y_test,
+                                              y_pred=mdl.fit(self.X_train, self.y_train).predict(
+                                                  self.X_test))
                     elif self.is_classifier:
                         test_score = accuracy_score(y_true=self.y_test,
                                                     y_pred=mdl.fit(self.X_train, self.y_train).predict(self.X_test))
