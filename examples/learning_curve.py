@@ -17,7 +17,8 @@ This `machinelearningmastery article <https://machinelearningmastery.com/learnin
 import logging
 
 import plotly
-from sklearn.datasets import load_digits
+from sklearn.datasets import load_digits, load_diabetes
+from sklearn.linear_model import RidgeCV
 from sklearn.model_selection import ShuffleSplit
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import make_pipeline, Pipeline
@@ -36,8 +37,8 @@ logging.basicConfig(level=logging.DEBUG,
 X, y = load_digits(return_X_y=True)
 
 # %%
-# Create pipeline
-# ---------------
+# Create a Classifier Pipeline
+# ----------------------------
 #
 # The pipeline will likely include some pre-processing.
 
@@ -69,3 +70,18 @@ plotly.io.show(fig)  # this call to show will set the thumbnail for use in the g
 # View the data
 
 lc.data
+
+# %%
+# Regressor Learning Curve
+# ------------------------
+
+diabetes = load_diabetes(as_frame=True)
+X, y = diabetes.data, diabetes.target
+y.name = "progression"
+
+pipe: Pipeline = make_pipeline(StandardScaler(), RidgeCV())
+pipe
+
+fig = plot_learning_curve(pipe, x=X, y=y)
+fig.update_layout(height=600)
+fig
