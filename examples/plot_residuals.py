@@ -9,20 +9,13 @@ Code has been adapted from the
 `plotly example <https://plotly.com/python/ml-regression/>`_
 
 """
-import numpy as np
-import pandas as pd
-import plotly
-from sklearn.feature_selection import SelectKBest
-from sklearn.linear_model import Lasso
-from sklearn.pipeline import make_pipeline
-from sklearn.datasets import make_classification
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.ensemble import RandomForestClassifier
-from sklearn import datasets, linear_model
-
-from elphick.sklearn_viz.features import plot_feature_importance, FeatureImportance
 import logging
+
+import plotly
+from sklearn import datasets
+from sklearn.linear_model import Lasso
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
 
 from elphick.sklearn_viz.residuals.error import Errors
 
