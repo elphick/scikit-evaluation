@@ -51,7 +51,8 @@ class ModelSelection:
                  y_train: Union[pd.DataFrame, pd.Series],
                  k_folds: int = 10,
                  x_test: Optional[pd.DataFrame] = None,
-                 y_test: Optional[Union[pd.DataFrame, pd.Series]] = None):
+                 y_test: Optional[Union[pd.DataFrame, pd.Series]] = None,
+                 models_are_estimators_only: bool = True):
         """
 
         Args:
@@ -62,7 +63,9 @@ class ModelSelection:
             k_folds: The number of cross validation folds.
             x_test: X values provided to calculate test error.
             y_test: y values provided to calculate test error.
-
+            models_are_estimators_only: if True, the models will be substituted in the last position of the mdl if
+                it is a pipeline.  If False the models are treated as pipelines and compared directly, which is useful
+                 for comparing models with different pre-processors.
         """
         self._logger = logging.getLogger(name=__class__.__name__)
         self.mdl = mdl
@@ -72,6 +75,7 @@ class ModelSelection:
         self.k_folds: int = k_folds
         self.X_test: Optional[pd.DataFrame] = x_test
         self.y_test: Optional[Union[pd.DataFrame, pd.Series]] = y_test
+        self.models_are_estimators_only = models_are_estimators_only
         self._data: Optional[pd.DataFrame] = None
         self.is_pipeline: bool = isinstance(mdl, Pipeline)
         self.is_classifier: bool = is_classifier(mdl)
@@ -91,7 +95,7 @@ class ModelSelection:
             cv_chunks: List = []
             test_chunks: List = []
             for name, model in self.models.items():
-                if self.is_pipeline:
+                if self.models_are_estimators_only and self.is_pipeline:
                     mdl = deepcopy(self.mdl)
                     mdl.steps[-1] = (model.__class__.__name__.lower(), model)
                 else:
