@@ -64,8 +64,8 @@ class ModelSelection:
             x_test: X values provided to calculate test error.
             y_test: y values provided to calculate test error.
             models_are_estimators_only: if True, the models will be substituted in the last position of the mdl if
-                it is a pipeline.  If False the models are treated as pipelines and compared directly, which is useful
-                 for comparing models with different pre-processors.
+             it is a pipeline.  If False the models are treated as pipelines and compared directly, which is useful
+             for comparing models with different pre-processors.
         """
         self._logger = logging.getLogger(name=__class__.__name__)
         self.mdl = mdl
