@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sklearn-viz"
-version = "0.1.8"
+version = "0.1.9"
 description = ""
 authors = ["Greg <11791585+elphick@users.noreply.github.com>"]
 readme = "README.md"
