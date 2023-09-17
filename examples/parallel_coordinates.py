@@ -34,7 +34,7 @@ df
 
 fig = plot_parallel_coordinates(df, target=y.name)
 # noinspection PyTypeChecker
-# pio.show(fig)
+pio.show(fig)
 
 # %%
 # The target is optional.  If the plot is too dense, then consider sampling as demonstrated.
