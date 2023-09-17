@@ -17,7 +17,7 @@ from sklearn.linear_model import Lasso
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 
-from elphick.sklearn_viz.residuals.error import Errors
+from elphick.sklearn_viz.residuals import Errors
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
