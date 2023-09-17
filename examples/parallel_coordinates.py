@@ -17,7 +17,7 @@ import pandas as pd
 import plotly.io as pio
 from sklearn.datasets import load_diabetes, load_wine
 
-from elphick.sklearn_viz.features.parallel_coordinates import plot_parallel_coordinates
+from elphick.sklearn_viz.features import plot_parallel_coordinates
 
 # %%
 # Load Classification Data
@@ -32,9 +32,9 @@ df
 # Plot Classification Data
 # ------------------------
 
-fig = plot_parallel_coordinates(pd.concat([X, y], axis=1), target=y.name)
+fig = plot_parallel_coordinates(df, target=y.name)
 # noinspection PyTypeChecker
-pio.show(fig)
+# pio.show(fig)
 
 # %%
 # The target is optional.  If the plot is too dense, then consider sampling as demonstrated.
