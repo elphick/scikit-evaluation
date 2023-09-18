@@ -100,6 +100,7 @@ class PrincipalComponents:
             res['loadings'] = pd.DataFrame(data=pca.components_.T * np.sqrt(pca.explained_variance_),
                                            index=self.x.columns, columns=dim_names)
             res['data'] = data
+            self._data = res
 
         return res
 
@@ -203,6 +204,7 @@ class PrincipalComponents:
         )
         title = 'Cumulative Explained Variance by Principal Component' if title is None else title
         fig.update_layout(title=title)
+        fig.update_xaxes(type='category')
 
         return fig
 

@@ -32,7 +32,7 @@ df
 # Plot Classification Data
 # ------------------------
 
-fig = plot_parallel_coordinates(df, target=y.name)
+fig = plot_parallel_coordinates(df, color=y.name)
 # noinspection PyTypeChecker
 pio.show(fig)
 
@@ -55,12 +55,12 @@ df
 # Plot Regression Data
 # --------------------
 
-fig = plot_parallel_coordinates(df, target=y.name)
+fig = plot_parallel_coordinates(df, color=y.name)
 fig
 
 # %%
 # Categorical data is supported
 
 df['sex'] = df['sex'].map({1: 'Male', 2: 'Female'}).astype('category')
-fig = plot_parallel_coordinates(df.sample(frac=0.5), target=y.name)
+fig = plot_parallel_coordinates(df.sample(frac=0.5), color=y.name)
 fig
