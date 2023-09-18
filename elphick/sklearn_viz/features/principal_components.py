@@ -122,8 +122,10 @@ class PrincipalComponents:
             a plotly GraphObjects.Figure
 
         """
+        df_plot: pd.DataFrame = pd.concat([self.data['data'], self.x.reset_index()], axis=1)
         if plot_3d:
-            fig = px.scatter_3d(self.data['data'], x='PC1', y='PC2', z='PC3', color=self.y)
+            fig = px.scatter_3d(df_plot, x='PC1', y='PC2', z='PC3',
+                                color=self.y, hover_data=list(self.x.reset_index().columns))
             fig.update_traces(marker_size=4)
             if loading_vectors:
 
@@ -136,7 +138,7 @@ class PrincipalComponents:
                     # noinspection PyTypeChecker
                     fig.add_trace(
                         go.Scatter3d(x=(row.x,), y=(row.y,), z=(row.z,), mode='markers',
-                                     marker={'size': 7, 'line': dict(width=2, color='black')},
+                                     marker={'size': 6, 'line': dict(width=2, color='black')},
                                      name=feature_name,
                                      showlegend=True,
                                      legendgroup="features",
@@ -151,7 +153,10 @@ class PrincipalComponents:
                 title = (f"Top 3 Principal Components<br>Explained Variance = "
                          f"{round(self.data['var'].iloc[0:3].sum(), 1)}%") if title is None else title
         else:  # 2D
-            fig = px.scatter(self.data['data'], x='PC1', y='PC2', color=self.y)
+            fig = px.scatter(df_plot, x='PC1', y='PC2',
+                             color=self.y, hover_data=list(self.x.reset_index().columns))
+            fig.update_traces(marker_size=4)
+
             if loading_vectors:
                 loadings = self.data['loadings'].iloc[:, 0:2]
                 for i, feature in enumerate(loadings.index):
@@ -224,11 +229,15 @@ class PrincipalComponents:
             x = self.data['data']
             title = 'Scatter Matrix - All Principal Components' if title is None else title
 
-        fig = px.scatter_matrix(
-            data_frame=pd.concat([x, y], axis=1),
-            dimensions=list(x.columns),
-            color=y.name
-        )
+        if original_features:
+            df_plot: pd.DataFrame = pd.concat([x.reset_index(), y], axis=1)
+            hover_data = ['index' if x.index.name is None else x.index.name]
+        else:
+            df_plot: pd.DataFrame = pd.concat([x, y, self.x.reset_index()], axis=1)
+            hover_data = list(self.x.reset_index().columns)
+
+        fig = px.scatter_matrix(data_frame=df_plot, dimensions=list(x.columns),
+                                color=y.name, hover_data=hover_data)
         fig.update_traces(diagonal_visible=False)
         title = 'Top 3 Principal Components' if title is None else title
         fig.update_layout(title=title)
