@@ -6,18 +6,18 @@ import plotly.graph_objects as go
 
 
 def plot_parallel_coordinates(data: pd.DataFrame,
-                  target: Optional[str] = None,
-                  vars_include: Optional[List[str]] = None,
-                  vars_exclude: Optional[List[str]] = None,
-                  title: Optional[str] = None,
-                  ) -> go.Figure:
+                              color: Optional[str] = None,
+                              vars_include: Optional[List[str]] = None,
+                              vars_exclude: Optional[List[str]] = None,
+                              title: Optional[str] = None,
+                              ) -> go.Figure:
     """Create an interactive parallel plot
 
     Useful to explore multidimensional data like mass-composition data
 
     Args:
         data: The DataFrame to plot
-        target: The target variable, which will set the color
+        color: The variable that sets the color, typically the target variable
         vars_include: Optional List of variables to include in the plot
         vars_exclude: Optional List of variables to exclude in the plot
         title: Optional plot title
@@ -60,10 +60,10 @@ def plot_parallel_coordinates(data: pd.DataFrame,
             )
         col_list.append(col_dict)
 
-    if target is None:
+    if color is None:
         fig = go.Figure(data=go.Parcoords(dimensions=col_list))
     else:
-        fig = go.Figure(data=go.Parcoords(dimensions=col_list, line=dict(color=data[target])))
+        fig = go.Figure(data=go.Parcoords(dimensions=col_list, line=dict(color=data[color])))
 
     fig.update_layout(title=title, height=700)
 
