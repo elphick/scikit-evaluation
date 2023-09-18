@@ -90,10 +90,9 @@ class PrincipalComponents:
         else:
             res: Dict = {}
             self._logger.info("Commencing PCA")
-            pc_names = [f"PC{i}" for i in range(1, len(self.x.columns) + 1)]
-            pca = PCA()
-            data: pd.DataFrame = pd.DataFrame(data=pca.fit_transform(self.x),
-                                              columns=pc_names)
+            pca = PCA().set_output(transform="pandas")
+            pca.columns = [f"PC{i}" for i in range(1, len(self.x.columns) + 1)]
+            data: pd.DataFrame = pca.fit_transform(self.x)
             var: pd.Series = pd.Series(data=pca.explained_variance_ratio_ * 100., name='explained_variance')
             res['var'] = var
             dim_names = ['x', 'y', 'z'] + [f"dim{i + 1}" for i in range(3, len(self.x.columns))]
