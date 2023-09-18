@@ -91,8 +91,8 @@ class PrincipalComponents:
             res: Dict = {}
             self._logger.info("Commencing PCA")
             pca = PCA().set_output(transform="pandas")
-            pca.columns = [f"PC{i}" for i in range(1, len(self.x.columns) + 1)]
             data: pd.DataFrame = pca.fit_transform(self.x)
+            data.columns = [f"PC{i}" for i in range(1, len(self.x.columns) + 1)]
             var: pd.Series = pd.Series(data=pca.explained_variance_ratio_ * 100., name='explained_variance')
             res['var'] = var
             dim_names = ['x', 'y', 'z'] + [f"dim{i + 1}" for i in range(3, len(self.x.columns))]
@@ -123,9 +123,8 @@ class PrincipalComponents:
 
         """
         if plot_3d:
-            fig = px.scatter_3d(
-                self.data['data'], x='PC1', y='PC2', z='PC3', color=self.y,
-            )
+            fig = px.scatter_3d(self.data['data'], x='PC1', y='PC2', z='PC3', color=self.y)
+            fig.update_traces(marker_size=4)
             if loading_vectors:
 
                 annots: List = [dict(x=row.x, y=row.y, z=row.z,
@@ -137,7 +136,7 @@ class PrincipalComponents:
                     # noinspection PyTypeChecker
                     fig.add_trace(
                         go.Scatter3d(x=(row.x,), y=(row.y,), z=(row.z,), mode='markers',
-                                     marker={'size': 10, 'line': dict(width=2, color='black')},
+                                     marker={'size': 7, 'line': dict(width=2, color='black')},
                                      name=feature_name,
                                      showlegend=True,
                                      legendgroup="features",
