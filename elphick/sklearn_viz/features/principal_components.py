@@ -122,7 +122,7 @@ class PrincipalComponents:
             a plotly GraphObjects.Figure
 
         """
-        df_plot: pd.DataFrame = pd.concat([self.data['data'], self.x.reset_index()], axis=1)
+        df_plot: pd.DataFrame = pd.concat([self.data['data'], self.x], axis=1).reset_index()
         if plot_3d:
             fig = px.scatter_3d(df_plot, x='PC1', y='PC2', z='PC3',
                                 color=self.y, hover_data=list(self.x.reset_index().columns))
@@ -155,7 +155,7 @@ class PrincipalComponents:
         else:  # 2D
             fig = px.scatter(df_plot, x='PC1', y='PC2',
                              color=self.y, hover_data=list(self.x.reset_index().columns))
-            fig.update_traces(marker_size=4)
+            fig.update_traces(marker_size=5)
 
             if loading_vectors:
                 loadings = self.data['loadings'].iloc[:, 0:2]
