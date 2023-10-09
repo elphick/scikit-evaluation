@@ -72,7 +72,8 @@ class FeatureImportance:
         self._data: Optional[pd.DataFrame] = None
         self.is_pipeline: bool = isinstance(mdl, Pipeline)
 
-        check_is_fitted(mdl[-1]) if self.is_pipeline else check_is_fitted(mdl)
+        if not self.permute:
+            check_is_fitted(mdl[-1]) if self.is_pipeline else check_is_fitted(mdl)
 
     @property
     @log_timer
@@ -109,8 +110,15 @@ class FeatureImportance:
             except AttributeError:
                 self._logger.warning("Feature names are not available within the model."
                                      " Setting the transform output to pandas will correct this."
-                                     " e.g. pipe.set_output(transform='pandas')")
-                feature_names = [f"F{i}" for i in range(1, mdl.n_features_in_ + 1)]
+                                     " e.g. pipe.set_output(transform='pandas')."
+                                     " Retrying with the pre-processed feature names.")
+                try:
+                    # Likely non-sklearn estimator like CatBoostRegressor
+                    feature_names = list(self.mdl[0:-1].transform(self.X_test).columns)
+                except AttributeError:
+                    self._logger.warning("Feature names are not available within the model."
+                                         " Setting default names")
+                    feature_names = [f"F{i}" for i in range(1, mdl.n_features_in_ + 1)]
 
             res: pd.DataFrame = pd.DataFrame([importances, std], index=['importance', 'std'], columns=feature_names).T
             self._data = res
