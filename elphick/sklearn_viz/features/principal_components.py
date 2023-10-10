@@ -230,10 +230,10 @@ class PrincipalComponents:
             title = 'Scatter Matrix - All Principal Components' if title is None else title
 
         if original_features:
-            df_plot: pd.DataFrame = pd.concat([x.reset_index(), y], axis=1)
+            df_plot: pd.DataFrame = pd.concat([x, y], axis=1).reset_index()
             hover_data = ['index' if x.index.name is None else x.index.name]
         else:
-            df_plot: pd.DataFrame = pd.concat([x, y, self.x.reset_index()], axis=1)
+            df_plot: pd.DataFrame = pd.concat([x, y, self.x], axis=1).reset_index()
             hover_data = list(self.x.reset_index().columns)
 
         fig = px.scatter_matrix(data_frame=df_plot, dimensions=list(x.columns),
