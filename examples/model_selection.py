@@ -16,8 +16,7 @@ import pandas
 import pandas as pd
 import plotly
 from sklearn.datasets import load_diabetes
-from sklearn.linear_model import LogisticRegression, RidgeCV
-from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -38,29 +37,27 @@ url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-
 names = ['preg', 'plas', 'pres', 'skin', 'test', 'mass', 'pedi', 'age', 'class']
 dataframe = pandas.read_csv(url, names=names)
 array = dataframe.values
-X = pd.DataFrame(array[:, 0:8], columns=names[0:8])
+x = pd.DataFrame(array[:, 0:8], columns=names[0:8])
 y = pd.Series(array[:, 8], name=names[8])
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+xy: pd.DataFrame = pd.concat([x, y], axis=1)
 
 # %%
-# Create pipeline
-# ---------------
+# Intantiate
+# ----------
 #
-# The pipeline will likely include some pre-processing, typically the simple baseline model.
+# Create an optional pre-processor as a sklearn Pipeline.
 
-pipe: Pipeline = make_pipeline(StandardScaler(), LogisticRegression())
-pipe.set_output(transform="pandas")
+pp: Pipeline = make_pipeline(StandardScaler())
 models_to_test: Dict = Models().fast_classifiers()
-pipe
+pp
 
 # %%
 # Plot using the function
 # -----------------------
 
-fig = plot_model_selection(pipe, models=models_to_test, x_train=X_train, y_train=y_train, k_folds=5)
-fig.update_layout(height=600)
-fig
+# fig = plot_model_selection(algorithms=models_to_test, datasets=xy, target='class', pre_processor=pp)
+# fig.update_layout(height=600)
+# fig
 
 # %%
 # Plot using the object
@@ -69,8 +66,8 @@ fig
 # We pass in the test data for additional context, and calculate across 30 folds.
 # The test data score is plotted as an orange marker.
 
-ms: ModelSelection = ModelSelection(pipe, models=models_to_test, x_train=X_train, y_train=y_train,
-                                    k_folds=30, x_test=X_test, y_test=y_test)
+ms: ModelSelection = ModelSelection(algorithms=models_to_test, datasets=xy, target='class', pre_processor=pp,
+                                    k_folds=30)
 fig = ms.plot(title='Model Selection')
 fig.update_layout(height=600)
 # noinspection PyTypeChecker
@@ -84,25 +81,32 @@ ms.data
 # %%
 # Regressor Model Selection
 # -------------------------
+#
+# Testing different Algorithms
 
 diabetes = load_diabetes(as_frame=True)
-X, y = diabetes.data, diabetes.target
+x, y = diabetes.data, diabetes.target
 y.name = "progression"
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+xy: pd.DataFrame = pd.concat([x, y], axis=1)
 
-pipe: Pipeline = make_pipeline(StandardScaler(), RidgeCV())
+pp: Pipeline = make_pipeline(StandardScaler())
 models_to_test: Dict = Models().fast_regressors()
-pipe
 
-# %%
-
-fig = plot_model_selection(pipe, models=models_to_test,
-                           x_train=X_train, y_train=y_train)
+fig = plot_model_selection(algorithms=models_to_test, datasets=xy, target='progression', pre_processor=pp,
+                           k_folds=30)
 fig.update_layout(height=600)
 fig
 
 # %%
-fig = plot_model_selection(pipe, models=models_to_test,
-                           x_train=X_train, y_train=y_train, x_test=X_test, y_test=y_test)
+# Comparing Datasets
+# ------------------
+#
+# Next we will demonstrate a single Algorithm with multiple datasets.
+
+datasets: Dict = {'DS1': xy, 'DS2': xy.sample(frac=0.4)}
+
+fig = plot_model_selection(algorithms=LinearRegression(), datasets=datasets, target='progression', pre_processor=pp,
+                           k_folds=30)
 fig.update_layout(height=600)
 fig
+
