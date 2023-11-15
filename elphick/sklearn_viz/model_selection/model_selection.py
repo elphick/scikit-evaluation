@@ -1,16 +1,18 @@
 import logging
-from typing import Union, Optional, Dict, List
+from typing import Union, Optional, Dict, List, Callable, Any
 
 import matplotlib
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import sklearn
+from plotly.subplots import make_subplots
 from sklearn import model_selection
 from sklearn.base import is_classifier, is_regressor
 from sklearn.model_selection import cross_validate
 from sklearn.pipeline import Pipeline
 
+from elphick.sklearn_viz.model_selection.metrics import regression_metrics, classification_metrics
 from elphick.sklearn_viz.model_selection.scorers import classification_scorers, regression_scorers
 from elphick.sklearn_viz.utils import log_timer
 
@@ -46,7 +48,9 @@ class ModelSelection:
                  datasets: Union[pd.DataFrame, Dict],
                  target: str,
                  pre_processor: Optional[Pipeline] = None,
-                 k_folds: int = 10):
+                 k_folds: int = 10,
+                 scorer: Optional[Union[str, Callable]] = None,
+                 metrics: Optional[Dict[str, Callable]] = None):
         """
 
         Args:
@@ -55,6 +59,8 @@ class ModelSelection:
             target: target column
             pre_processor: Optional pipeline used to pre-process the datasets.
             k_folds: The number of cross validation folds.
+            scorer: Optional callable scorers which the model will be fitted using
+            metrics: Optional Dict of callable metrics to calculate post-fitting
         """
         self._logger = logging.getLogger(name=__class__.__name__)
         self.pre_processor: Pipeline = pre_processor
@@ -69,9 +75,18 @@ class ModelSelection:
         self.target = target
         self.k_folds: int = k_folds
 
-        self.is_classifier: bool = is_classifier(list(self.algorithms.items())[0][0])
-        self.is_regressor: bool = is_regressor(list(self.algorithms.items())[0][0])
-        self.scorers = classification_scorers if self.is_classifier else regression_scorers
+        self.is_classifier: bool = is_classifier(list(self.algorithms.values())[0])
+        self.is_regressor: bool = is_regressor(list(self.algorithms.values())[0])
+        if scorer is not None:
+            self.scorer = scorer
+        else:
+            self.scorer = classification_scorers[list(classification_scorers.keys())[0]] if self.is_classifier else \
+                regression_scorers[list(regression_scorers.keys())[0]]
+
+        if metrics is not None:
+            self.metrics = metrics
+        else:
+            self.metrics = classification_metrics if self.is_classifier else regression_metrics
 
         self.features_in: List[str] = [col for col in self.datasets[list(self.datasets.keys())[0]] if
                                        col != self.target]
@@ -86,10 +101,14 @@ class ModelSelection:
     @property
     @log_timer
     def data(self) -> Optional[Dict]:
+        if self.metrics is None:
+            cv_kwargs: Dict = dict()
+        else:
+            cv_kwargs: Dict = dict(return_estimator=True, return_indices=True)
+
         if self._data is not None:
             results = self._data
         else:
-            first_scorer: str = list(self.scorers.items())[0][0]
             results: Dict = {}
             for data_key, data in self.datasets.items():
                 self._logger.info(f"Commencing Cross Validation for dataset {data_key}")
@@ -101,10 +120,13 @@ class ModelSelection:
 
                 for algo_key, algo in self.algorithms.items():
                     kfold = model_selection.KFold(n_splits=self.k_folds)
-                    res = cross_validate(algo, x, y, cv=kfold, scoring=self.scorers)
+                    res = cross_validate(algo, x, y, cv=kfold, scoring=self.scorer, **cv_kwargs)
+                    if self.metrics is not None:
+                        res['metrics'] = self.calculate_metrics(x=x, y=y, estimators=res['estimator'],
+                                                                indices=res['indices'])
                     results[data_key][algo_key] = res
-                    res_mean = res[f"test_{first_scorer}"].mean()
-                    res_std = res[f"test_{first_scorer}"].std()
+                    res_mean = res[f"test_score"].mean()
+                    res_std = res[f"test_score"].std()
                     self._logger.info(f"CV Results for {algo_key}: Mean = {res_mean}, SD = {res_std}")
 
             self._data = results
@@ -112,27 +134,49 @@ class ModelSelection:
         return results
 
     def plot(self,
-             scorer: Optional[str] = None,
+             metrics: Optional[Union[str, Dict[str, Any]]] = None,
+             color_group: Optional[Union[str, pd.Series]] = None,
              title: Optional[str] = None) -> go.Figure:
         """Create the plot
 
         KUDOS: https://towardsdatascience.com/applying-a-custom-colormap-with-plotly-boxplots-5d3acf59e193
 
         Args:
-            scorer: the scorer metric to plot
-            title: title for the plot
+            metrics: The metric or metrics to plot in addition to the scorer.  Each metric will be plotted in a
+             separate panel.
+            color_group: An optional column name or Series to create a grouped boxplot.  Column must be a category or
+             object.
+            title: Title of the plot
 
         Returns:
             a plotly GraphObjects.Figure
 
         """
 
-        if scorer is None:
-            scorer: str = list(self.scorers.items())[0][0]
-
-        data: pd.DataFrame = self.get_cv_scores(scorer)
+        data: pd.DataFrame = self.get_cv_scores()
         data = data.droplevel(level=0, axis=1) if self._num_datasets == 1 else data.droplevel(level=1, axis=1)
-        xaxis_title = 'Algorithm' if self._num_algorithms > 1 else 'Dataset'
+
+        num_plots = 1
+        metric_data: pd.DataFrame = pd.DataFrame()
+        if metrics is not None:
+            if isinstance(metrics, str):
+                metrics = {metrics: metrics}
+            metric_keys: List[str] = list(metrics.keys())
+            metric_data = self.get_cv_metrics(metrics.keys())
+            num_plots += len(metrics)
+        else:
+            metrics = []
+            metric_keys = []
+
+        if isinstance(color_group, str):
+            color_group = data[color_group]
+
+        if self._num_algorithms > 1:
+            xaxis_title = 'Algorithm'
+            unstack_index = 'algo_key'
+        else:
+            xaxis_title = 'Dataset'
+            unstack_index = 'data_key'
 
         vmin, vmax = data.min().min(), data.max().max()
         norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
@@ -144,18 +188,49 @@ class ModelSelection:
         else:
             title = title + '<br>' + subtitle
 
-        fig = go.Figure()
+        fig = make_subplots(rows=1, cols=num_plots, subplot_titles=[f'{self.scorer} (scorer)'] + metric_keys)
         for col in data.columns:
             median = np.median(data[col])  # find the median
             color = 'rgb' + str(cmap(norm(median))[0:3])  # normalize
             fig.add_trace(go.Box(y=data[col], name=col, boxpoints='all', notched=True, fillcolor=color,
-                                 line={"color": "grey"}, marker={"color": "grey"}))
-        fig.update_layout(title=title, showlegend=False, yaxis_title=scorer, xaxis_title=xaxis_title)
+                                 line={"color": "grey"}, marker={"color": "grey"}), row=1, col=1)
+
+            for i, metric in enumerate(metrics):
+                df_metric: pd.DataFrame = metric_data.query('metric==@metric').drop(columns=['metric']).unstack(
+                    unstack_index).droplevel(0, axis=1)
+                fig.add_trace(go.Box(y=df_metric[col], name=col, boxpoints='all', notched=True,
+                                     line={"color": "grey"}, marker={"color": "grey"}), row=1, col=2 + i)
+
+        fig.update_layout(title=title, showlegend=False)
         return fig
 
-    def get_cv_scores(self, scorer) -> pd.DataFrame:
+    def get_cv_scores(self) -> pd.DataFrame:
         chunks: List = []
         for data_key, data in self.datasets.items():
             for algo_key, algo in self.algorithms.items():
-                chunks.append(pd.Series(self.data[data_key][algo_key][f"test_{scorer}"], name=(data_key, algo_key)))
+                chunks.append(pd.Series(self.data[data_key][algo_key][f"test_score"], name=(data_key, algo_key)))
         return pd.concat(chunks, axis=1)
+
+    def get_cv_metrics(self, metrics) -> pd.DataFrame:
+        chunks: List = []
+        for data_key, data in self.datasets.items():
+            for algo_key, algo in self.algorithms.items():
+                for metric in metrics:
+                    chunks.append(pd.DataFrame(self.data[data_key][algo_key]["metrics"][metric]).assign(
+                        **dict(data_key=data_key, algo_key=algo_key, metric=metric)))
+        res: pd.DataFrame = pd.concat(chunks, axis=0).set_index(['data_key', 'algo_key'], append=True).rename(
+            columns={0: 'value'})
+        res.index.names = ['cv', 'data_key', 'algo_key']
+        return res
+
+    def calculate_metrics(self, x, y, estimators, indices) -> Dict:
+        metric_results: Dict = {}
+        for k, fn_metric in self.metrics.items():
+            metric_values: List = []
+            for estimator, test_indexes in zip(estimators, indices['test']):
+                y_true = y[y.index[test_indexes]]
+                y_est = estimator.predict(x.loc[x.index[test_indexes], :])
+                metric_values.append(fn_metric(y_true, y_est))
+            metric_results[k] = metric_values
+
+        return metric_results
