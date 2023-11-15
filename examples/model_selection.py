@@ -20,7 +20,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from elphick.sklearn_viz.model_selection import ModelSelection, plot_model_selection
+from elphick.sklearn_viz.model_selection import ModelSelection, plot_model_selection, metrics
 from elphick.sklearn_viz.model_selection.models import Models
 
 logging.basicConfig(level=logging.DEBUG,
@@ -31,7 +31,7 @@ logging.basicConfig(level=logging.DEBUG,
 # Load Data
 # ---------
 #
-# Once loaded we'll create the train-test split
+# Once loaded we'll create the train-test split for a classification problem.
 
 url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
 names = ['preg', 'plas', 'pres', 'skin', 'test', 'mass', 'pedi', 'age', 'class']
@@ -42,8 +42,8 @@ y = pd.Series(array[:, 8], name=names[8])
 xy: pd.DataFrame = pd.concat([x, y], axis=1)
 
 # %%
-# Intantiate
-# ----------
+# Instantiate
+# -----------
 #
 # Create an optional pre-processor as a sklearn Pipeline.
 
@@ -55,9 +55,9 @@ pp
 # Plot using the function
 # -----------------------
 
-# fig = plot_model_selection(algorithms=models_to_test, datasets=xy, target='class', pre_processor=pp)
-# fig.update_layout(height=600)
-# fig
+fig = plot_model_selection(algorithms=models_to_test, datasets=xy, target='class', pre_processor=pp)
+fig.update_layout(height=600)
+fig
 
 # %%
 # Plot using the object
@@ -68,7 +68,7 @@ pp
 
 ms: ModelSelection = ModelSelection(algorithms=models_to_test, datasets=xy, target='class', pre_processor=pp,
                                     k_folds=30)
-fig = ms.plot(title='Model Selection')
+fig = ms.plot(title='Model Selection', metrics='f1')
 fig.update_layout(height=600)
 # noinspection PyTypeChecker
 plotly.io.show(fig)  # this call to show will set the thumbnail for use in the gallery
@@ -88,12 +88,15 @@ diabetes = load_diabetes(as_frame=True)
 x, y = diabetes.data, diabetes.target
 y.name = "progression"
 xy: pd.DataFrame = pd.concat([x, y], axis=1)
+group: pd.Series = pd.Series(x['sex'] > 0, name='grp_sex', index=x.index)
 
 pp: Pipeline = make_pipeline(StandardScaler())
 models_to_test: Dict = Models().fast_regressors()
 
-fig = plot_model_selection(algorithms=models_to_test, datasets=xy, target='progression', pre_processor=pp,
-                           k_folds=30)
+ms: ModelSelection = ModelSelection(algorithms=models_to_test, datasets=xy, target='progression', pre_processor=pp,
+                                    k_folds=5, scorer='r2')
+fig = ms.plot(metrics={'moe': metrics.moe_95, 'me': metrics.mean_error},
+              color_group=group)
 fig.update_layout(height=600)
 fig
 
@@ -106,7 +109,6 @@ fig
 datasets: Dict = {'DS1': xy, 'DS2': xy.sample(frac=0.4)}
 
 fig = plot_model_selection(algorithms=LinearRegression(), datasets=datasets, target='progression', pre_processor=pp,
-                           k_folds=30)
+                           k_folds=5)
 fig.update_layout(height=600)
 fig
-
