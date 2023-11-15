@@ -94,7 +94,7 @@ pp: Pipeline = make_pipeline(StandardScaler())
 models_to_test: Dict = Models().fast_regressors()
 
 ms: ModelSelection = ModelSelection(algorithms=models_to_test, datasets=xy, target='progression', pre_processor=pp,
-                                    k_folds=5, scorer='r2')
+                                    k_folds=30, scorer='r2')
 fig = ms.plot(metrics={'moe': metrics.moe_95, 'me': metrics.mean_error},
               color_group=group)
 fig.update_layout(height=600)
@@ -109,6 +109,6 @@ fig
 datasets: Dict = {'DS1': xy, 'DS2': xy.sample(frac=0.4)}
 
 fig = plot_model_selection(algorithms=LinearRegression(), datasets=datasets, target='progression', pre_processor=pp,
-                           k_folds=5)
+                           k_folds=30)
 fig.update_layout(height=600)
 fig
