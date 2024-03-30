@@ -7,6 +7,7 @@ from scipy.stats import chi2
 import plotly.graph_objects as go
 
 from elphick.sklearn_viz.features import PrincipalComponents
+from elphick.sklearn_viz.features.principal_components import PCResults
 from elphick.sklearn_viz.features.scatter_matrix import plot_scatter_matrix
 from elphick.sklearn_viz.utils import log_timer
 
@@ -43,7 +44,8 @@ def plot_outlier_matrix(x: pd.DataFrame, pca_spec: Union[float, int] = 0, p_val:
 
 
 class OutlierDetection:
-    def __init__(self, x: pd.DataFrame, pca_spec: Union[float, int] = 0, p_val: float = 0.001):
+    def __init__(self, x: pd.DataFrame, pca_spec: Union[float, int] = 0,
+                 standardise: bool = False, p_val: float = 0.001):
         """
 
         Args:
@@ -51,11 +53,14 @@ class OutlierDetection:
             pca_spec: If zero, pca is not used.  For integers (n) > 0 outlier detection is performed on the
              top n principal components. For values (f) < 1, outlier detection is performed on the number of
              principal components that explain f% of the variance.
+            standardise: If True, standardise the data prior to PCA, where vectors are transformed to zero mean and
+             unit variance.
             p_val: the p-value threshold for outlier detection.
         """
         self._logger = logging.getLogger(name=__class__.__name__)
         self.x: pd.DataFrame = x
         self.pca_spec: Union[float, int] = pca_spec
+        self.standardise: bool = standardise
         self.p_val: float = p_val
 
         self._data: Optional[Dict] = None
@@ -66,17 +71,18 @@ class OutlierDetection:
         if self._data is not None:
             res = self._data
         else:
+            label: str = 'std' if self.standardise else 'raw'
             res: Dict = {}
             if self.pca_spec != 0:
                 res['pca'] = PrincipalComponents(self.x)
-                pca_data: Dict = res['pca'].data
+                pca_data: PCResults = res['pca'].data[label]
                 if self.pca_spec >= 1:
-                    mahal = mahalanobis(x=pca_data['data'].iloc[:, 0:self.pca_spec])
+                    mahal = mahalanobis(x=pca_data.data.iloc[:, 0:self.pca_spec])
                 elif self.pca_spec < 1:
                     num_required: int = next(i for i, v in
-                                             enumerate(pca_data['var'].cumsum() / 100 >= self.pca_spec) if
+                                             enumerate(pca_data.explained_variance.cumsum() / 100 >= self.pca_spec) if
                                              v is True) + 1
-                    mahal = mahalanobis(x=pca_data['data'].iloc[:, 0:num_required])
+                    mahal = mahalanobis(x=pca_data.data.iloc[:, 0:num_required])
                 else:
                     raise ValueError("pca_spec cannot be negative")
             else:

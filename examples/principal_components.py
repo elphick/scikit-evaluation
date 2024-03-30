@@ -53,13 +53,13 @@ fig
 # Scatter - 2D PCA
 # ^^^^^^^^^^^^^^^^
 
-fig = plot_principal_components(x=x, y=y, plot_3d=False, loading_vectors=False)
+fig = plot_principal_components(x=x, color=y, plot_3d=False, loading_vectors=False)
 fig.update_layout(height=800)
 fig
 
 # %%
 # Plotting loading vectors is the default.
-fig = plot_principal_components(x=x, y=y, plot_3d=False)
+fig = plot_principal_components(x=x, color=y, plot_3d=False)
 fig.update_layout(height=800)
 # noinspection PyTypeChecker
 pio.show(fig)
@@ -75,13 +75,13 @@ fig
 # Scatter - 3D PCA
 # ^^^^^^^^^^^^^^^^
 
-fig = plot_principal_components(x=x, y=y, loading_vectors=False)
+fig = plot_principal_components(x=x, color=y, loading_vectors=False)
 fig.update_layout(height=800)
 fig
 
 # %%
 # Plotting loading vectors is the default.
-fig = plot_principal_components(x=x, y=y)
+fig = plot_principal_components(x=x, color=y)
 fig.update_layout(height=800)
 fig
 
@@ -98,7 +98,7 @@ df = pd.concat([x, y], axis=1)
 df.shape
 
 # %%
-fig = plot_principal_components(x=x, y=y, plot_3d=False)
+fig = plot_principal_components(x=x, color=y, plot_3d=False)
 fig.update_layout(height=800)
 fig
 
@@ -112,7 +112,7 @@ fig
 #
 # By plotting with the object rather than the function you can access the data.
 
-pca = PrincipalComponents(x=x, y=y)
+pca = PrincipalComponents(x=x, color=y)
 fig = pca.plot_explained_variance()
 fig
 

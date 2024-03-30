@@ -42,28 +42,26 @@ def plot_parallel_coordinates(data: pd.DataFrame,
 
     for col in df.columns:
         if col in categorical_columns:  # categorical columns
-            values = data[col].unique()
-            value2dummy = dict(zip(values, range(
-                len(values))))  # works if values are strings, otherwise we probably need to convert them
-            data[col] = [value2dummy[v] for v in data[col]]
+            cat_map: dict = dict(enumerate(df[col].cat.categories))
+            df[col] = df[col].cat.codes
             col_dict = dict(
                 label=col,
-                tickvals=list(value2dummy.values()),
-                ticktext=list(value2dummy.keys()),
-                values=data[col],
+                tickvals=list(cat_map.keys()),
+                ticktext=list(cat_map.values()),
+                values=df[col],
             )
         else:  # continuous columns
             col_dict = dict(
-                range=(data[col].min(), data[col].max()),
+                range=(df[col].min(), df[col].max()),
                 label=col,
-                values=data[col],
+                values=df[col],
             )
         col_list.append(col_dict)
 
     if color is None:
         fig = go.Figure(data=go.Parcoords(dimensions=col_list))
     else:
-        fig = go.Figure(data=go.Parcoords(dimensions=col_list, line=dict(color=data[color])))
+        fig = go.Figure(data=go.Parcoords(dimensions=col_list, line=dict(color=df[color])))
 
     fig.update_layout(title=title, height=700)
 
