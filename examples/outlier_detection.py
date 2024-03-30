@@ -65,12 +65,12 @@ fig = plot_explained_variance(x=x)
 fig
 
 # %%
-fig = plot_principal_components(plot_3d=False, x=x, y=test_outlier)
+fig = plot_principal_components(plot_3d=False, x=x, color=test_outlier)
 fig.update_layout(height=800)
 fig
 
 # %%
-fig = plot_principal_components(plot_3d=True, x=x, y=test_outlier)
+fig = plot_principal_components(plot_3d=True, x=x, color=test_outlier)
 fig.update_layout(height=800)
 fig
 
@@ -84,7 +84,7 @@ detected_outliers: pd.Series = od.data['outlier']
 # %%
 # Visualise the detected outliers with the default p_val of 0.001
 
-fig = plot_principal_components(plot_3d=False, x=x, y=detected_outliers)
+fig = plot_principal_components(plot_3d=False, x=x, color=detected_outliers)
 fig.update_layout(height=800)
 fig
 
@@ -92,7 +92,7 @@ fig
 # We can tighten the threshold to align more closely with our expectation.
 
 detected_outliers: pd.Series = OutlierDetection(x=x, pca_spec=2, p_val=0.25).data['outlier']
-fig = plot_principal_components(plot_3d=False, x=x, y=detected_outliers)
+fig = plot_principal_components(plot_3d=False, x=x, color=detected_outliers)
 fig.update_layout(height=800)
 # noinspection PyTypeChecker
 pio.show(fig)
