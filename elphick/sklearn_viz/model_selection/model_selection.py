@@ -277,7 +277,7 @@ class ModelSelection:
         baseline_metrics: pd.DataFrame = self.get_cv_metrics(metrics, by_group=True).loc[
             (slice(None), dataset, algorithm)]
         baseline_metrics = baseline_metrics.melt(id_vars=['metric'], value_vars=self.group.unique().tolist(),
-                                                 var_name=['group'],
+                                                 var_name='group',
                                                  ignore_index=False).assign(model='baseline')
 
         # cross-validate the individual models
