@@ -59,7 +59,8 @@ class ModelSelection:
                  k_folds: int = 10,
                  scorer: Optional[Union[str, Callable]] = None,
                  metrics: Optional[Dict[str, Callable]] = None,
-                 group: Optional[pd.Series] = None):
+                 group: Optional[pd.Series] = None,
+                 random_state: Optional[int] = None):
         """
 
         Args:
@@ -72,6 +73,7 @@ class ModelSelection:
             metrics: Optional Dict of callable metrics to calculate post-fitting
             group: Optional group variable by which to partition/group metrics.  The same group applies across all
              datasets, so is more useful when testing different algorithms.
+            random_state: Optional random seed
         """
         self._logger = logging.getLogger(name=__class__.__name__)
         self.pre_processor: Pipeline = pre_processor
@@ -100,6 +102,7 @@ class ModelSelection:
             self.metrics = classification_metrics if self.is_classifier else regression_metrics
 
         self.group: pd.Series = group
+        self.random_state: Optional[int] = random_state
 
         self.features_in: List[str] = [col for col in self.datasets[list(self.datasets.keys())[0]] if
                                        col != self.target]
@@ -131,7 +134,7 @@ class ModelSelection:
                     x = self.pre_processor.set_output(transform="pandas").fit_transform(X=x)
 
                 for algo_key, algo in self.algorithms.items():
-                    kfold = model_selection.KFold(n_splits=self.k_folds)
+                    kfold = model_selection.KFold(n_splits=self.k_folds, random_state=self.random_state)
                     res = cross_validate(algo, x, y, cv=kfold, scoring=self.scorer, **cv_kwargs)
                     if self.metrics is not None:
                         res['metrics'], res['metrics_group'] = self.calculate_metrics(x=x, y=y,
@@ -238,6 +241,136 @@ class ModelSelection:
 
         return fig
 
+    def plot_category_analysis(self,
+                               algorithm: Optional[str] = None,
+                               dataset: Optional[str] = None,
+                               metrics: Optional[Union[str, List[str]]] = None,
+                               title: Optional[str] = None,
+                               col_wrap: Optional[int] = None) -> go.Figure:
+        """Plot the category feature analysis
+
+        Args:
+            algorithm: If supplied, this will be the name of the algorithm tested.  If None the first algorithm is used.
+            dataset: If supplied, this will be the name of the dataset tested.  If None the first dataset is used.
+            metrics: The metric or metrics to plot in addition to the scorer.  Each metric will be plotted in a
+             separate panel.
+            title: Title of the plot
+            col_wrap: If plotting multiple metrics, col_wrap will wrap columns to new rows, resulting in
+             col-wrap columns, and multiple rows.
+
+        Returns:
+            a plotly GraphObjects.Figure
+
+        """
+        algorithms: list[str] = list(self.algorithms.keys())
+        algorithm: str = algorithms[0] if algorithm is None else algorithm
+        if algorithm not in algorithms:
+            raise KeyError(f"Algorithm {algorithm} is not in the list of available algorithms: {algorithms}")
+
+        datasets: list[str] = list(self.datasets.keys())
+        dataset: str = datasets[0] if dataset is None else dataset
+        if dataset not in datasets:
+            raise KeyError(f"Dataset {dataset} is not in the list of available datasets: {datasets}")
+
+        baseline_scores: pd.DataFrame = self.get_cv_scores()[[(dataset, algorithm)]]
+        baseline_scores.columns = ['baseline']
+        baseline_metrics: pd.DataFrame = self.get_cv_metrics(metrics, by_group=True).loc[
+            (slice(None), dataset, algorithm)]
+        baseline_metrics = baseline_metrics.melt(id_vars=['metric'], value_vars=self.group.unique().tolist(),
+                                                 var_name=['group'],
+                                                 ignore_index=False).assign(model='baseline')
+
+        # cross-validate the individual models
+        by_group_metrics, by_group_scores = self.get_model_by_group_data(algorithm, dataset)
+        by_group_metrics = by_group_metrics.melt(id_vars=['group'], value_vars=metrics, var_name='metric',
+                                                 ignore_index=False).assign(model='by_group')
+        metric_data: pd.DataFrame = pd.concat([baseline_metrics, by_group_metrics]).sort_values(['model', 'metric'])
+        metric_data = metric_data.set_index(['metric', 'group'], append=True).pivot(columns='model',
+                                                                                    values='value').reset_index(
+            'metric')
+        score_data = pd.concat([baseline_scores, by_group_scores], axis=1)
+        score_relative = score_data[[col for col in score_data.columns if col != 'baseline']].div(
+            score_data['baseline'], axis=0)
+
+        vmin, vmax = 0.8, 1.2
+        norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
+        cmap = matplotlib.cm.get_cmap('RdYlGn')
+
+        subtitle: str = f'Model by Group Test with {self.k_folds} folds'
+        if title is None:
+            title = subtitle
+        else:
+            title = title + '<br>' + subtitle
+
+        num_plots: int = len(metrics) + 1 if len(metrics) > 0 else 1
+        num_cols: int = num_plots if col_wrap is None else col_wrap
+        num_rows, _ = subplot_index(len(metrics), col_wrap=num_cols)
+        fig = make_subplots(rows=num_rows, cols=num_cols,
+                            subplot_titles=[f'Relative Score ({self.scorer})<br>(by group / baseline)'] + metrics)
+
+        # scorer
+        for col in score_relative.columns:
+            # For the scorer build the plot by column to color individually based on score
+            median = np.median(score_relative[col])  # find the median
+            color = 'rgb' + str(cmap(norm(median))[0:3])  # normalize
+            fig.add_trace(go.Box(y=score_relative[col], name=col, boxpoints='all', notched=True, fillcolor=color,
+                                 line={"color": "grey"}, marker={"color": "grey"}, showlegend=False,
+                                 offsetgroup='A'), row=1, col=1)
+
+        # metrics
+        for i, metric in enumerate(metrics):
+            row, col = subplot_index(i + 1, col_wrap=num_cols)
+            colorscale = colors.qualitative.Plotly
+            add_to_legend = True if i == 0 else False
+            df_metric: pd.DataFrame = metric_data.query('metric==@metric').drop(columns=['metric'])
+            x = df_metric.index.get_level_values('group')
+            for g, grp in enumerate(df_metric.columns):
+                fig.add_trace(go.Box(x=x, y=df_metric[grp], name=grp, boxpoints='all', notched=True,
+                                     legendgroup=self.group.name,
+                                     showlegend=add_to_legend,
+                                     line={"color": colorscale[g]}, marker={"color": colorscale[g]},
+                                     offsetgroup=str(g)), row=row, col=col)
+
+        fig.update_layout(title=title, showlegend=False)
+        fig.update_layout(boxmode='group', showlegend=True, legend_title='model',
+                          boxgroupgap=0.5, boxgap=0
+                          )
+
+        return fig
+
+    def get_model_by_group_data(self, algorithm, dataset):
+        results: dict = {}
+        by_group_score_chunks: list = []
+        by_group_metric_chunks: list = []
+        for grp in self.group.unique():
+            grp_index: pd.Index = self.group.loc[self.group == grp].index
+            x: pd.DataFrame = self.datasets[dataset][self.features_in].loc[grp_index]
+            y: pd.DataFrame = self.datasets[dataset][self.target].loc[grp_index]
+            if self.pre_processor:
+                x = self.pre_processor.set_output(transform="pandas").fit_transform(X=x)
+            kfold = model_selection.KFold(n_splits=self.k_folds, random_state=self.random_state)
+            res = cross_validate(self.algorithms[algorithm], x, y, cv=kfold, scoring=self.scorer, return_estimator=True,
+                                 return_indices=True)
+            by_group_score_chunks.append(pd.Series(res['test_score'], name=grp))
+            if self.metrics is not None:
+                res['metrics'], _ = self.calculate_metrics(x=x, y=y,
+                                                           estimators=res['estimator'],
+                                                           indices=res['indices'],
+                                                           group=None)
+            results[grp] = res
+            by_group_metric_chunks.append(
+                pd.DataFrame(res['metrics']).assign(group=grp).rename_axis('fold', axis='index'))
+        by_group_metrics: pd.DataFrame = pd.concat(by_group_metric_chunks)
+        #                                   .reset_index().melt(id_vars=['fold', 'group'],
+        #                                                                                       value_vars=list(
+        #                                                                                           self.metrics.keys()),
+        #                                                                                       var_name='metric'))
+        # by_group_metrics = by_group_metrics.set_index(['fold', 'metric', 'group']).unstack(level=-1)
+        # by_group_metrics = by_group_metrics.droplevel(level=0, axis=1).reset_index(-1)
+        by_group_scores = pd.concat(by_group_score_chunks, axis=1)
+
+        return by_group_metrics, by_group_scores
+
     def get_cv_scores(self) -> pd.DataFrame:
         chunks: List = []
         for data_key, data in self.datasets.items():
@@ -255,7 +388,7 @@ class ModelSelection:
                         **dict(data_key=data_key, algo_key=algo_key, metric=metric)))
         res: pd.DataFrame = pd.concat(chunks, axis=0).set_index(['data_key', 'algo_key'], append=True).rename(
             columns={0: 'value'})
-        res.index.names = ['cv', 'data_key', 'algo_key']
+        res.index.names = ['fold', 'data_key', 'algo_key']
         return res
 
     def calculate_metrics(self, x, y, estimators, indices, group) -> Tuple[Dict, Dict]:
@@ -287,7 +420,6 @@ class ModelSelection:
                 metric_results_group[k] = metric_groups
 
         return metric_results, metric_results_group
-
 
 # if __name__ == '__main__':
 #
