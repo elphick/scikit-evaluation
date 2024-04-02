@@ -29,8 +29,8 @@ def r2(y_true, y_est):
     return 1 - (ssr / sst)
 
 
-regression_metrics = {'me': mean_error,
-                      'r2_score': r2_score,
+regression_metrics = {'r2_score': r2_score,
+                      'me': mean_error,
                       'r2': r2,
                       'mae': mean_absolute_error,
                       'mse': mean_squared_error,
