@@ -1,10 +1,9 @@
 import logging
-from typing import Union, Optional, Dict, List, Callable, Any, Tuple
+from typing import Union, Optional, Dict, List, Callable, Tuple
 
 import matplotlib
 import numpy as np
 import pandas as pd
-
 import plotly.graph_objects as go
 import sklearn
 from plotly import colors
@@ -16,7 +15,6 @@ from sklearn.pipeline import Pipeline
 
 from elphick.sklearn_viz.model_selection.metrics import regression_metrics, classification_metrics
 from elphick.sklearn_viz.model_selection.scorers import classification_scorers, regression_scorers
-from elphick.sklearn_viz.utils import log_timer
 
 
 def subplot_index(idx: int, col_wrap: int) -> Tuple[int, int]:
@@ -134,7 +132,7 @@ class ModelSelection:
                     x = self.pre_processor.set_output(transform="pandas").fit_transform(X=x)
 
                 for algo_key, algo in self.algorithms.items():
-                    kfold = model_selection.KFold(n_splits=self.k_folds, random_state=self.random_state)
+                    kfold = model_selection.KFold(n_splits=self.k_folds, random_state=self.random_state, shuffle=True)
                     res = cross_validate(algo, x, y, cv=kfold, scoring=self.scorer, **cv_kwargs)
                     if self.metrics is not None:
                         res['metrics'], res['metrics_group'] = self.calculate_metrics(x=x, y=y,
@@ -252,7 +250,7 @@ class ModelSelection:
         Args:
             algorithm: If supplied, this will be the name of the algorithm tested.  If None the first algorithm is used.
             dataset: If supplied, this will be the name of the dataset tested.  If None the first dataset is used.
-            metrics: The metric or metrics to plot in addition to the scorer.  Each metric will be plotted in a
+            metrics: The metric or metrics to show.  Each metric will be plotted in a
              separate panel.
             title: Title of the plot
             col_wrap: If plotting multiple metrics, col_wrap will wrap columns to new rows, resulting in
@@ -272,8 +270,8 @@ class ModelSelection:
         if dataset not in datasets:
             raise KeyError(f"Dataset {dataset} is not in the list of available datasets: {datasets}")
 
-        baseline_scores: pd.DataFrame = self.get_cv_scores()[[(dataset, algorithm)]]
-        baseline_scores.columns = ['baseline']
+        metrics: list[str] = [list(self.metrics.keys())[0]] if metrics is None else metrics
+
         baseline_metrics: pd.DataFrame = self.get_cv_metrics(metrics, by_group=True).loc[
             (slice(None), dataset, algorithm)]
         baseline_metrics = baseline_metrics.melt(id_vars=['metric'], value_vars=self.group.unique().tolist(),
@@ -288,38 +286,19 @@ class ModelSelection:
         metric_data = metric_data.set_index(['metric', 'group'], append=True).pivot(columns='model',
                                                                                     values='value').reset_index(
             'metric')
-        score_data = pd.concat([baseline_scores, by_group_scores], axis=1)
-        score_relative = score_data[[col for col in score_data.columns if col != 'baseline']].div(
-            score_data['baseline'], axis=0)
 
-        vmin, vmax = 0.8, 1.2
-        norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
-        cmap = matplotlib.cm.get_cmap('RdYlGn')
-
-        subtitle: str = f'Model by Group Test with {self.k_folds} folds'
         if title is None:
-            title = subtitle
-        else:
-            title = title + '<br>' + subtitle
+            title = f'Model by Group Test on {algorithm} with {self.k_folds} folds'
 
-        num_plots: int = len(metrics) + 1 if len(metrics) > 0 else 1
+        num_plots: int = len(metrics) if len(metrics) > 0 else 1
         num_cols: int = num_plots if col_wrap is None else col_wrap
-        num_rows, _ = subplot_index(len(metrics), col_wrap=num_cols)
+        num_rows, _ = subplot_index(len(metrics) - 1, col_wrap=num_cols)
         fig = make_subplots(rows=num_rows, cols=num_cols,
-                            subplot_titles=[f'Relative Score ({self.scorer})<br>(by group / baseline)'] + metrics)
-
-        # scorer
-        for col in score_relative.columns:
-            # For the scorer build the plot by column to color individually based on score
-            median = np.median(score_relative[col])  # find the median
-            color = 'rgb' + str(cmap(norm(median))[0:3])  # normalize
-            fig.add_trace(go.Box(y=score_relative[col], name=col, boxpoints='all', notched=True, fillcolor=color,
-                                 line={"color": "grey"}, marker={"color": "grey"}, showlegend=False,
-                                 offsetgroup='A'), row=1, col=1)
+                            subplot_titles=metrics)
 
         # metrics
         for i, metric in enumerate(metrics):
-            row, col = subplot_index(i + 1, col_wrap=num_cols)
+            row, col = subplot_index(i, col_wrap=num_cols)
             colorscale = colors.qualitative.Plotly
             add_to_legend = True if i == 0 else False
             df_metric: pd.DataFrame = metric_data.query('metric==@metric').drop(columns=['metric'])
@@ -348,7 +327,7 @@ class ModelSelection:
             y: pd.DataFrame = self.datasets[dataset][self.target].loc[grp_index]
             if self.pre_processor:
                 x = self.pre_processor.set_output(transform="pandas").fit_transform(X=x)
-            kfold = model_selection.KFold(n_splits=self.k_folds, random_state=self.random_state)
+            kfold = model_selection.KFold(n_splits=self.k_folds, random_state=self.random_state, shuffle=True)
             res = cross_validate(self.algorithms[algorithm], x, y, cv=kfold, scoring=self.scorer, return_estimator=True,
                                  return_indices=True)
             by_group_score_chunks.append(pd.Series(res['test_score'], name=grp))
