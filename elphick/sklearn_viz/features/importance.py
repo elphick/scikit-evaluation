@@ -1,14 +1,16 @@
 import logging
-from typing import Union, Optional, Dict
+from typing import Union, Optional, Dict, Callable
 
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from sklearn.base import is_classifier
 
 from sklearn.inspection import permutation_importance
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_is_fitted
 
+from elphick.sklearn_viz.model_selection.scorers import r2_score_with_nan, classification_scorers, regression_scorers
 from elphick.sklearn_viz.utils import log_timer
 
 
@@ -52,7 +54,8 @@ class FeatureImportance:
                  permute: bool = False,
                  pipeline_input_features: bool = False,
                  x_test: Optional[pd.DataFrame] = None,
-                 y_test: Optional[Union[pd.DataFrame, pd.Series]] = None):
+                 y_test: Optional[Union[pd.DataFrame, pd.Series]] = None,
+                 scorer: Optional[Union[str, Callable]] = None,):
         """
 
         Args:
@@ -62,6 +65,8 @@ class FeatureImportance:
              the pipeline.  If False, reports the estimator (last pipeline step) input features.  Requires permute = True.
             x_test: X values provided to execute permuted importance.
             y_test: y values provided to execute permuted importance.
+            scorer: Optional callable scorer which the model will be fitted using
+
         """
         self._logger = logging.getLogger(name=__class__.__name__)
         self.mdl = mdl
@@ -69,6 +74,13 @@ class FeatureImportance:
         self.pipeline_input_features: bool = pipeline_input_features
         self.X_test: Optional[pd.DataFrame] = x_test
         self.y_test: Optional[Union[pd.DataFrame, pd.Series]] = y_test
+
+        if scorer is not None:
+            self.scorer = scorer
+        else:
+            self.scorer = classification_scorers[list(classification_scorers.keys())[0]] if is_classifier(self.mdl) else \
+                regression_scorers[list(regression_scorers.keys())[0]]
+
         self._data: Optional[pd.DataFrame] = None
         self.is_pipeline: bool = isinstance(mdl, Pipeline)
 
@@ -91,7 +103,7 @@ class FeatureImportance:
                     x = self.mdl[0:-1].transform(self.X_test)
 
                 result = permutation_importance(estimator=mdl, X=x, y=self.y_test, n_repeats=10, random_state=42,
-                                                n_jobs=2)
+                                                n_jobs=2, scoring=self.scorer)
                 importances = result.importances_mean
                 std = result.importances_std
             else:

@@ -117,7 +117,7 @@ class ModelSelection:
         if self.metrics is None:
             cv_kwargs: Dict = dict()
         else:
-            cv_kwargs: Dict = dict(return_estimator=True, return_indices=True)
+            cv_kwargs: Dict = dict(return_estimator=True, return_indices=True, error_score=np.nan)
 
         if self._data is not None:
             results = self._data
@@ -380,6 +380,8 @@ class ModelSelection:
             for estimator, test_indexes in zip(estimators, indices['test']):
                 y_true = y[y.index[test_indexes]]
                 y_est = estimator.predict(x.loc[x.index[test_indexes], :])
+                if isinstance(y_est, pd.DataFrame) and y_est.shape[1] == 1:
+                    y_est = y_est.iloc[:, 0]
                 metric_values.append(fn_metric(y_true, y_est))
                 if group is not None:
                     # calculate the metric by each group in the group series.
