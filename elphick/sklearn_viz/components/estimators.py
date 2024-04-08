@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.base import RegressorMixin, BaseEstimator, ClassifierMixin
+from sklearn.base import RegressorMixin, BaseEstimator
 from sklearn.exceptions import NotFittedError
 from sklearn.utils._estimator_html_repr import _VisualBlock
 from sklearn.utils.validation import check_is_fitted
@@ -34,7 +34,7 @@ class PartitionRegressor(RegressorMixin, BaseEstimator):
     def score(self, X, y, sample_weight=None):
         pass
 
-    def fit(self, X: pd.DataFrame, y: [pd.DataFrame, None] = None) -> 'PartitionEstimator':
+    def fit(self, X: pd.DataFrame, y: [pd.DataFrame, None] = None) -> 'PartitionRegressor':
         # fit the estimators only on the appropriate records
         self.x_train_ = X
         self.y_train_ = y if isinstance(y, pd.DataFrame) else y.to_frame()
