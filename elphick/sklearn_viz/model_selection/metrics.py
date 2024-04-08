@@ -29,14 +29,22 @@ def r2(y_true, y_est):
     return 1 - (ssr / sst)
 
 
-regression_metrics = {'r2_score': r2_score,
-                      'me': mean_error,
-                      'r2': r2,
-                      'mae': mean_absolute_error,
-                      'mse': mean_squared_error,
-                      'rmse': partial(mean_squared_error, squared=False),
-                      'moe': partial(moe_95, metric='moe'),
-                      'moe_lo': partial(moe_95, metric='lo'),
-                      'moe_hi': partial(moe_95, metric='hi')}
+def r2_with_nan(y_true, y_est):
+    numerator = np.nansum((y_true - y_est) ** 2, axis=0, dtype=np.float64)
+    denominator = np.nansum((y_true - np.nanmean(y_true, axis=0)) ** 2, axis=0, dtype=np.float64)
+    return np.mean(1 - numerator / denominator)
+
+
+regression_metrics = {
+    # 'r2_nan': r2_with_nan,
+    'r2_score': r2_score,
+    'me': mean_error,
+    'r2': r2,
+    'mae': mean_absolute_error,
+    'mse': mean_squared_error,
+    'rmse': partial(mean_squared_error, squared=False),
+    'moe': partial(moe_95, metric='moe'),
+    'moe_lo': partial(moe_95, metric='lo'),
+    'moe_hi': partial(moe_95, metric='hi')}
 
 classification_metrics = {'f1': f1_score}
