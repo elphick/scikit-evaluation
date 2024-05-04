@@ -1,8 +1,6 @@
-import pandas as pd
-import numpy as np
 import pytest
 from elphick.sklearn_viz.model_selection.model_selection import ModelSelection
-from fixtures import model_selection, dataset, algorithm
+from .fixtures import model_selection, dataset, algorithm
 
 
 def test_instantiation(model_selection):
