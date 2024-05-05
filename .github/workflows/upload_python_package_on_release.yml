@@ -21,9 +21,9 @@ jobs:
       - name: Check if version has been incremented
         id: check
         run: |
-          git fetch origin master:master
+          git fetch origin main:main
           VERSION_MASTER=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
-          git checkout master
+          git checkout main
           VERSION_OLD=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
           if [ "$VERSION_MASTER" != "$VERSION_OLD" ]; then
             echo "::set-output name=version_changed::true"
