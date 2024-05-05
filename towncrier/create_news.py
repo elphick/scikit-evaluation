@@ -1,5 +1,6 @@
 import os
 import subprocess
+from pathlib import Path
 
 
 def create_news_fragments():
@@ -11,8 +12,11 @@ def create_news_fragments():
         hash, message = commit.split(' ', 1)
 
         # Create a news fragment file for each commit
-        with open(f'newsfragments/{hash}.feature', 'w') as f:
+        filename = Path(f'newsfragments/{hash}.bugfix')
+        with open(filename, 'w') as f:
             f.write(message)
+
+        print(f'Created file: {filename.name}')
 
 
 if __name__ == '__main__':
