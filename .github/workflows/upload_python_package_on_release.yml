@@ -25,21 +25,16 @@ jobs:
       - name: Check if version has been incremented
         id: check
         run: |
-          git fetch origin main:temp_main
-          git checkout temp_main
+          git checkout main^
           VERSION_MASTER=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
-          echo "Version on main branch: $VERSION_MASTER"
+          echo "Version on previous commit: $VERSION_MASTER"
           git checkout main
           VERSION_OLD=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
-          echo "Version on current branch: $VERSION_OLD"
+          echo "Version on current commit: $VERSION_OLD"
           if [ "$VERSION_MASTER" != "$VERSION_OLD" ]; then
             echo "::set-output name=version_changed::true"
           fi
         shell: bash
-
-      - name: Print version_changed
-        run: |
-          echo "version_changed: ${{ steps.check.outputs.version_changed }}"
 
 
   deploy:
