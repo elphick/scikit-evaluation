@@ -38,35 +38,31 @@ jobs:
           VERSION_OLD=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
           echo "Version on current commit: $VERSION_OLD"
           if [ "$VERSION_MASTER" != "$VERSION_OLD" ]; then
-            echo "::set-output name=version_changed::true"
+            echo "version_changed=true" >> $GITHUB_ENV
           fi
         shell: bash
 
 
   deploy:
     needs: check_version
-    if: needs.check_version.outputs.version_changed == 'true'
     runs-on: ubuntu-latest
-
+    env:
+      VERSION_CHANGED: ${{ needs.check_version.outputs.version_changed }}
+    if: env.VERSION_CHANGED == 'true'
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-
       - name: Install Poetry
         run: |
           pip install poetry==1.5.0
-
       - name: Install dependencies
         run: |
           poetry install --no-interaction --no-root
-
       - name: Build package
         run: poetry build
-
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
         with:
