@@ -50,8 +50,9 @@ def plot_model_selection(algorithms: Union[sklearn.base.RegressorMixin, sklearn.
 
 class ModelSelection:
     def __init__(self,
-                 algorithms: Union[sklearn.base.RegressorMixin, sklearn.base.ClassifierMixin, Dict],
-                 datasets: Union[pd.DataFrame, Dict],
+                 algorithms: Union[
+                     sklearn.base.RegressorMixin, sklearn.base.ClassifierMixin, Dict[str, sklearn.base.BaseEstimator]],
+                 datasets: Union[pd.DataFrame, Dict[str, pd.DataFrame]],
                  target: str,
                  pre_processor: Optional[Pipeline] = None,
                  k_folds: int = 10,
@@ -155,6 +156,11 @@ class ModelSelection:
              col_wrap: Optional[int] = None) -> go.Figure:
         """Create the plot
 
+        The plot will show the cross-validation scores for each algorithm and dataset.  The first panel is used to show
+        the scorer, that is the metric used to fit the model.  If multiple metrics are supplied, each metric will be
+        shown in a separate panel.  If a show_group is true, the metrics will be grouped by the group variable.
+        col_wrap allows the width of the plot to be controlled by wrapping the columns to new rows.
+
         KUDOS: https://towardsdatascience.com/applying-a-custom-colormap-with-plotly-boxplots-5d3acf59e193
 
         Args:
@@ -187,6 +193,7 @@ class ModelSelection:
         else:
             x_index = 'data_key'
 
+        # define the color map for the scorer
         vmin, vmax = data.min().min(), data.max().max()
         norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
         cmap = matplotlib.cm.get_cmap('RdYlGn')
@@ -197,12 +204,13 @@ class ModelSelection:
         else:
             title = title + '<br>' + subtitle
 
+        # create the plot, managing the shape.
         num_plots: int = len(metrics) + 1 if len(metrics) > 0 else 1
         num_cols: int = num_plots if col_wrap is None else col_wrap
         num_rows, _ = subplot_index(len(metrics), col_wrap=num_cols)
         fig = make_subplots(rows=num_rows, cols=num_cols, subplot_titles=[f'{self.scorer} (scorer)'] + metrics)
 
-        # scorer
+        # Add the scorer subplot
         for col in data.columns:
             # For the scorer build the plot by column to color individually based on score
             median = np.median(data[col])  # find the median
@@ -211,15 +219,17 @@ class ModelSelection:
                                  line={"color": "grey"}, marker={"color": "grey"}, showlegend=False,
                                  offsetgroup='A'), row=1, col=1)
 
-        # metrics
+        # add the metric subplots
         for i, metric in enumerate(metrics):
             row, col = subplot_index(i + 1, col_wrap=num_cols)
             if show_group:
-                colorscale = colors.qualitative.Plotly
+                colorscale = colors.qualitative.Plotly + colors.qualitative.Dark24
                 add_to_legend = True if i == 0 else False
                 df_metric: pd.DataFrame = metric_data.query('metric==@metric').drop(columns=['metric'])
                 x = df_metric.index.get_level_values(x_index)
                 for g, grp in enumerate(df_metric.columns):
+                    if len(df_metric.columns) > len(colorscale):
+                        raise ValueError("Too many groups to plot")
                     fig.add_trace(go.Box(x=x, y=df_metric[grp], name=grp, boxpoints='all', notched=True,
                                          legendgroup=self.group.name,
                                          showlegend=add_to_legend,
@@ -231,6 +241,7 @@ class ModelSelection:
                 fig.add_trace(go.Box(x=x, y=df_metric.values.ravel(), name=metric, boxpoints='all', notched=True,
                                      line={"color": "grey"}, marker={"color": "grey"}), row=row, col=col)
 
+        # finalise some display elements
         fig.update_layout(title=title, showlegend=False)
         if show_group:
             fig.update_layout(boxmode='group', showlegend=True, legend_title=self.group.name,
