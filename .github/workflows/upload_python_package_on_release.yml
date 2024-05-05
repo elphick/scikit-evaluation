@@ -21,12 +21,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Check if version has been incremented
         id: check
         run: |
-          git checkout main^
-          VERSION_MASTER=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
+          if git rev-parse --verify main^ >/dev/null 2>&1; then
+            git checkout main^
+            VERSION_MASTER=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
+          else
+            VERSION_MASTER=""
+          fi
           echo "Version on previous commit: $VERSION_MASTER"
           git checkout main
           VERSION_OLD=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
