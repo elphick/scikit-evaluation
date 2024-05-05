@@ -39,6 +39,7 @@ jobs:
           echo "Version on current commit: $VERSION_OLD"
           if [ "$VERSION_MASTER" != "$VERSION_OLD" ]; then
             echo "version_changed=true" >> $GITHUB_ENV
+            echo "::set-output name=version_changed::true"
           fi
         shell: bash
 
