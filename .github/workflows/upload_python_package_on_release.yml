@@ -38,7 +38,7 @@ jobs:
         shell: bash
 
       - name: Print version_changed
-        run:
+        run: |
           echo "version_changed: ${{ steps.check.outputs.version_changed }}"
 
 
