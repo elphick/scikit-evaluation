@@ -25,7 +25,7 @@ sphinx-rtd-theme = "^1.0.0"
 sphinx-gallery = "^0.11.1"
 sphinx-autodoc-typehints = "^1.18.3"
 myst-parser = "^0.18.0"
-kaleido = {version="0.2.1", markers = "sys_platform == 'win32'"}  # For plotly thumbnails
+kaleido = "0.2.1"  # For plotly thumbnails
 
 [build-system]
 requires = ["poetry-core"]
