@@ -21,15 +21,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
+
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Configure poetry
+        run: |
+          python -m poetry config virtualenvs.in-project true
+
       - name: Install dependencies
         run: |
           poetry install
+
       - name: Sphinx build
         run: |
           sphinx-build docs/source _build
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}
