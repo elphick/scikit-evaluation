@@ -2,7 +2,10 @@ import inspect
 from pathlib import Path
 from typing import Optional
 
+import pandas as pd
+import plotly
 import plotly.offline as pyo
+import plotly.graph_objects as go
 
 
 class MultiPlot:
@@ -24,7 +27,7 @@ class MultiPlot:
         if self.tag:
             self.rst_file_path = self.output_dir / f"figures.{self.tag}.rst"
 
-    def save_plots(self, figs, height: int = 600, save_as_png=False):
+    def save_plots(self, figs, height: int = 600):
         for i, fig in enumerate(figs):
             suffix: str = f".{i}.html"
 
@@ -49,5 +52,23 @@ class MultiPlot:
                     rst_file.write("    </table>\n")
 
             # Save the figure as a PNG file if save_as_png is True
-            if save_as_png:
+            if self.save_as_png:
                 fig.write_image(file_path.with_suffix('.png'))
+
+
+def dataframe_to_figure(df: pd.DataFrame) -> go.Figure:
+    # Convert the DataFrame to a list of lists
+    df_values = df.values.tolist()
+
+    # Create a table
+    fig = go.Figure(data=[go.Table(header=dict(values=df.columns.tolist()),
+                                   cells=dict(values=df_values))])
+    return fig
+
+
+def dataframe_to_image(df: pd.DataFrame, output_file_name: Path):
+    # Create a table
+    fig = dataframe_to_figure(df)
+
+    # Save the table as a PNG image
+    plotly.write_image(fig, output_file_name)

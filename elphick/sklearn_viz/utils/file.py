@@ -5,9 +5,9 @@ from pathlib import Path
 from docutils.core import publish_file
 
 
-def script_path() -> str:
+def script_path() -> Path:
     """Return the path of the script being run, whether in a terminal or in a notebook."""
-    return os.path.abspath(inspect.stack()[1].filename)
+    return Path(os.path.abspath(inspect.stack()[1].filename))
 
 
 def convert_rst_to_html(input_file: Path, output_file: Path):

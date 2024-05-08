@@ -27,7 +27,7 @@ def main():
     # Run the commands
     run_command(f"poetry version {increment}")
     run_command("poetry install")
-    run_command("python towncrier/create_news.py")
+    # run_command("python towncrier/create_news.py")
     run_command("towncrier")
 
 
