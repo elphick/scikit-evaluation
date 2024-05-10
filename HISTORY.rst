@@ -1,3 +1,12 @@
+Elphick.Sklearn_Viz 0.6.1 (2024-05-11)
+======================================
+
+Bugfixes
+--------
+
+- Bugfix for ModelSelection default scorer bug. (#46)
+
+
 Elphick.Sklearn_Viz 0.6.0 (2024-05-10)
 ======================================
 

@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   check_version:
-    if: github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion == 'success'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     outputs:
       version_changed: ${{ steps.check.outputs.version_changed }}
@@ -46,8 +46,9 @@ jobs:
 
   deploy:
     needs: check_version
-    runs-on: ubuntu-latest
     if: needs.check_version.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
