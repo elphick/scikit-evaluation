@@ -7,4 +7,4 @@ def test_instantiation(model_selection):
     # Instantiate the class
     mdl_sel: ModelSelection = model_selection
     assert isinstance(mdl_sel, ModelSelection)
-    print(mdl_sel.data)
+    print(mdl_sel.results)

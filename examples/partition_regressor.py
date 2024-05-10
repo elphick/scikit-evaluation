@@ -125,11 +125,12 @@ est.head()
 # %%
 # Cross Validation
 # ----------------
-ms: ModelSelection = ModelSelection(algorithms={'base-model': base_mdl,
+ms: ModelSelection = ModelSelection(estimators={'base-model': base_mdl,
                                                 'partition-model': partition_mdl},
                                     datasets=xy_train,
                                     target='MedHouseVal',
-                                    group=partition_mdl[-1].domains_, random_state=1234)
+                                    group=partition_mdl[-1].domains_, random_state=1234,
+                                    scorer='r2')
 fig = ms.plot(show_group=True, metrics=['r2_score'])
 fig.update_layout(height=600)
 plotly.io.show(fig)

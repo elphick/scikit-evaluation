@@ -1,22 +1,18 @@
+from abc import ABC
+
 import numpy as np
 import pandas as pd
-from sklearn.base import RegressorMixin, BaseEstimator
+from sklearn.base import RegressorMixin, BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
 from sklearn.utils._estimator_html_repr import _VisualBlock
 from sklearn.utils.validation import check_is_fitted
+from typing import Union, Optional
 
 
-class PartitionRegressor(RegressorMixin, BaseEstimator):
-    """Prediction for partitioned subsets of records (estimation domains) defined by filter criteria.
-
-    A PartitionRegressor is designed to allow multiple models to be fitted on a subset of records defined by
-     a criteria applied to the input features.  So in essence the criteria definitions define estimation domains
-    (a.k.a. partitions) for individual model fitting.
-    """
-
+# noinspection PyAttributeOutsideInit
+class PartitionEstimatorBase(BaseEstimator, ABC):
     def __init__(self, estimator, *, partition_defs: dict[str, str], n_jobs=None, verbose=False):
-        super(RegressorMixin).__init__()
-        super(BaseEstimator).__init__()
+        super().__init__()
 
         self.n_jobs = n_jobs
         self.verbose = verbose
@@ -31,10 +27,7 @@ class PartitionRegressor(RegressorMixin, BaseEstimator):
         self.domain_indexes_: dict
         self.feature_names_in_: list
 
-    def score(self, X, y, sample_weight=None):
-        pass
-
-    def fit(self, X: pd.DataFrame, y: [pd.DataFrame, None] = None) -> 'PartitionRegressor':
+    def fit(self, X: pd.DataFrame, y: Union[pd.DataFrame, None] = None):
         # fit the estimators only on the appropriate records
         self.x_train_ = X
         self.y_train_ = y if isinstance(y, pd.DataFrame) else y.to_frame()
@@ -72,8 +65,11 @@ class PartitionRegressor(RegressorMixin, BaseEstimator):
                                      right=pd.concat(chunks, axis=0),
                                      left_index=True, right_index=True,
                                      how='left', ).drop(columns=['dummy', 'domain'])
-        # res['domain'] = res['domain'].astype('category')
         return res
+
+    def score(self, X, y, sample_weight=None):
+        # implementation goes here
+        pass
 
     @property
     def n_features_in_(self):
@@ -95,3 +91,45 @@ class PartitionRegressor(RegressorMixin, BaseEstimator):
         names, estimators = zip(*self.estimators)
         criteria = list(self.partition_defs.values())
         return _VisualBlock("parallel", estimators, names=names, name_details=criteria)
+
+
+class PartitionRegressor(PartitionEstimatorBase, RegressorMixin):
+    """Prediction for partitioned subsets of records (estimation domains) defined by filter criteria.
+
+    A PartitionRegressor is designed to allow multiple models to be fitted on a subset of records defined by
+     a criteria applied to the input features.  So in essence the criteria definitions define estimation domains
+    (a.k.a. partitions) for individual model fitting.
+    """
+
+    def __init__(self, estimator, *, partition_defs: dict[str, str], n_jobs=None, verbose=False):
+        super().__init__(estimator, partition_defs=partition_defs, n_jobs=n_jobs, verbose=verbose)
+        # set scorer for regression
+        self.scorer_ = 'r2'
+
+    def fit(self, X: pd.DataFrame, y: Optional[pd.DataFrame] = None) -> 'PartitionRegressor':
+        super().fit(X, y)
+        return self
+
+    def predict(self, X: pd.DataFrame) -> pd.DataFrame:
+        return super().predict(X)
+
+
+class PartitionClassifier(PartitionEstimatorBase, ClassifierMixin):
+    """Prediction for partitioned subsets of records (estimation domains) defined by filter criteria.
+
+    A PartitionClassifier is designed to allow multiple models to be fitted on a subset of records defined by
+     a criteria applied to the input features.  So in essence the criteria definitions define estimation domains
+    (a.k.a. partitions) for individual model fitting.
+    """
+
+    def __init__(self, estimator, *, partition_defs: dict[str, str], n_jobs=None, verbose=False):
+        super().__init__(estimator, partition_defs=partition_defs, n_jobs=n_jobs, verbose=verbose)
+        # set scorer for regression
+        self.scorer_ = 'accuracy'
+
+    def fit(self, X: pd.DataFrame, y: Optional[pd.DataFrame] = None) -> 'PartitionClassifier':
+        super().fit(X, y)
+        return self
+
+    def predict(self, X: pd.DataFrame) -> pd.DataFrame:
+        return super().predict(X)
