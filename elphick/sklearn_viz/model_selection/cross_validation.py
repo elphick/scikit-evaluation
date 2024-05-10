@@ -52,9 +52,7 @@ class CrossValidatorBase(ABC):
             raise ValueError("All estimators must be either classifiers or regressors.")
 
         if scorer is None:
-            default_scorer = 'accuracy' if self.is_classifier else 'r2'
-            scorer_dict = classification_scorers if self.is_classifier else regression_scorers
-            scorer = scorer_dict.get(default_scorer)
+            scorer = 'accuracy' if self.is_classifier else 'r2'
 
         if metrics is None:
             default_metrics = {
