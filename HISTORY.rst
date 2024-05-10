@@ -1,5 +1,14 @@
-Elphick.Sklearn_Viz 0.6.1 (2024-05-11)
-======================================
+Sklearn_Viz 0.6.2 (2024-05-11)
+==============================
+
+Features
+--------
+
+- Added multiproccessor support to ModelSelection.  Updated the example in the gallery. (#47)
+
+
+Sklearn_Viz 0.6.1 (2024-05-11)
+==============================
 
 Bugfixes
 --------
@@ -7,8 +16,8 @@ Bugfixes
 - Bugfix for ModelSelection default scorer bug. (#46)
 
 
-Elphick.Sklearn_Viz 0.6.0 (2024-05-10)
-======================================
+Sklearn_Viz 0.6.0 (2024-05-10)
+==============================
 
 Features
 --------
@@ -25,8 +34,8 @@ Bugfixes
 - Bugfix for ModelSelection that now supports datasets having different columns. (#36)
 
 
-Elphick.Sklearn_Viz 0.5.0 (2024-05-08)
-======================================
+Sklearn_Viz 0.5.0 (2024-05-08)
+==============================
 
 Features
 --------
