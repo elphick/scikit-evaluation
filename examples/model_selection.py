@@ -91,6 +91,9 @@ ms.results
 #
 # Of course we're not limited to classification problems.  We will demonstrate a regression problem, with multiple
 # metrics.  We prepare a `group` variable (a pd.Series) in order to calculate the metrics by group for each fold.
+#
+# This cross-validation takes a bit longer, so we set the n_jobs to -2, to fit in parallel, while preserving a core to
+# ensure the system can respond.
 
 diabetes = load_diabetes(as_frame=True)
 x, y = diabetes.data, diabetes.target
@@ -103,7 +106,8 @@ models_to_test: Dict = Models().fast_regressors()
 
 ms: ModelSelection = ModelSelection(estimators=models_to_test, datasets=xy, target='progression', pre_processor=pp,
                                     k_folds=30, scorer='r2', group=group,
-                                    metrics={'moe': metrics.moe_95, 'me': metrics.mean_error})
+                                    metrics={'moe': metrics.moe_95, 'me': metrics.mean_error},
+                                    n_jobs=-2)
 # %%
 # Next we'll view the plot, but we will not (yet) leverage the group variable.
 
@@ -129,7 +133,7 @@ fig
 # ------------------
 #
 # Next we will demonstrate a single Algorithm with multiple datasets.  This is useful when exploring features that
-# improve model performance.
+# improve model performance.  We modify DS2 by removing a feature and sampling 40% of the data.
 
 datasets: Dict = {'DS1': xy, 'DS2': xy.drop(columns=['age']).sample(frac=0.4)}
 

@@ -55,7 +55,8 @@ class ModelSelection(CrossValidatorBase):
                  scorer: Optional[Union[str, Callable]] = None,
                  metrics: Optional[Dict[str, Callable]] = None,
                  group: Optional[pd.Series] = None,
-                 random_state: Optional[int] = None):
+                 random_state: Optional[int] = None,
+                 n_jobs: Union[int, str] = 1):
         """
 
         Args:
@@ -69,12 +70,16 @@ class ModelSelection(CrossValidatorBase):
             group: Optional group variable by which to partition/group metrics.  The same group applies across all
              datasets, so is more useful when testing different algorithms.
             random_state: Optional random seed
+            n_jobs: Number of parallel jobs to run.  If -1, then the number of jobs is set to the number of CPU cores.
+             Recommend setting to -2 for large jobs to retain a core for system interaction.  If set to 'auto' and `cv`
+             is an integer, the optimum number of jobs is calculated.
         """
 
         self._logger = logging.getLogger(name=__class__.__name__)
 
         super().__init__(estimators=estimators, datasets=datasets, target=target, pre_processor=pre_processor,
-                         cv=k_folds, scorer=scorer, metrics=metrics, group=group, random_state=random_state)
+                         cv=k_folds, scorer=scorer, metrics=metrics, group=group, random_state=random_state,
+                         n_jobs=n_jobs)
 
     def plot(self,
              metrics: Optional[Union[str, List[str]]] = None,

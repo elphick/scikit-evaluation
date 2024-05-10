@@ -1,6 +1,10 @@
 import logging
+import math
+import multiprocessing
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Dict, Any, Union, Optional
 from typing import List
 
@@ -34,7 +38,10 @@ class CrossValidatorBase(ABC):
                  scorer: Any,
                  metrics: Optional[Dict[str, Any]],
                  group: Any,
-                 random_state: int):
+                 random_state: int,
+                 n_jobs: Union[int, str] = 1):
+
+        self._logger = logging.getLogger(self.__class__.__name__)
 
         # If algorithms is not a dictionary, convert it into a dictionary with a default key
         if not isinstance(estimators, dict):
@@ -71,6 +78,7 @@ class CrossValidatorBase(ABC):
         self.metrics: Dict[str, Any] = metrics
         self.group: Any = group
         self.random_state: int = random_state
+        self.n_jobs: int = n_jobs
 
         self._logger: logging.Logger = logging.getLogger(self.__class__.__name__)
         self._results: Optional[CrossValidationResult] = None
@@ -83,12 +91,17 @@ class CrossValidatorBase(ABC):
         self._num_datasets: int = len(list(self.datasets.keys()))
 
     @property
+    def n_cores(self) -> int:
+        n_cores = self.n_jobs
+        if self.n_jobs < 0:
+            n_cores = multiprocessing.cpu_count() + 1 + self.n_jobs
+        return n_cores
+
+    @property
     def results(self) -> Optional[Dict[str, Dict[str, CrossValidationResult]]]:
         if self._results is None:
-            if self.metrics is None:
-                cv_kwargs: Dict = dict()
-            else:
-                cv_kwargs: Dict = dict(return_estimator=True, return_indices=True, error_score=np.nan)
+
+            _tic = datetime.now()
 
             d_results: Dict = {data_key: {algo_key: {} for algo_key in self.estimators.keys()} for data_key in
                                self.datasets.keys()}
@@ -108,7 +121,8 @@ class CrossValidatorBase(ABC):
                     else:
                         cv = self.cv
                     res = cross_validate(estimator, x, y, cv=cv, scoring=self.scorer, return_train_score=True,
-                                         **cv_kwargs)
+                                         return_estimator=True, return_indices=True, error_score=np.nan,
+                                         n_jobs=self.n_jobs)
                     if self.metrics is not None:
                         res['metrics'], res['metrics_group'] = self.calculate_metrics(x=x, y=y,
                                                                                       estimators=res['estimator'],
@@ -131,6 +145,10 @@ class CrossValidatorBase(ABC):
                     self._logger.info(f"CV Results for {estimator_key}: Mean = {res_mean}, SD = {res_std}")
 
             self._results = d_results
+
+            self._logger.info(
+                f"Cross Validation complete in {datetime.now() - _tic} using {self.n_cores} "
+                f"worker{'s' if self.n_cores > 1 else ''}")
 
         return self._results
 
