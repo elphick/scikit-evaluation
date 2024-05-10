@@ -8,13 +8,10 @@ import plotly.graph_objects as go
 import sklearn
 from plotly import colors
 from plotly.subplots import make_subplots
-from sklearn import model_selection
-from sklearn.base import is_classifier, is_regressor
-from sklearn.model_selection import cross_validate
+from sklearn.base import BaseEstimator
 from sklearn.pipeline import Pipeline
 
-from elphick.sklearn_viz.model_selection.metrics import regression_metrics, classification_metrics
-from elphick.sklearn_viz.model_selection.scorers import classification_scorers, regression_scorers
+from elphick.sklearn_viz.model_selection.cross_validation import CrossValidatorBase
 
 
 def subplot_index(idx: int, col_wrap: int) -> Tuple[int, int]:
@@ -23,7 +20,7 @@ def subplot_index(idx: int, col_wrap: int) -> Tuple[int, int]:
     return row, col
 
 
-def plot_model_selection(algorithms: Union[sklearn.base.RegressorMixin, sklearn.base.ClassifierMixin, Dict],
+def plot_model_selection(estimators: Union[sklearn.base.RegressorMixin, sklearn.base.ClassifierMixin, Dict],
                          datasets: Union[pd.DataFrame, Dict],
                          target: str,
                          pre_processor: Optional[Pipeline] = None,
@@ -32,7 +29,7 @@ def plot_model_selection(algorithms: Union[sklearn.base.RegressorMixin, sklearn.
     """
 
     Args:
-            algorithms: sklearn estimator or a Dict of algorithms to cross-validate, keyed by string name/code.
+            estimators: sklearn estimator or a Dict of algorithms to cross-validate, keyed by string name/code.
             datasets: pandas DataFrame or a dict of DataFrames, keyed by string name/code.
             target: target column
             pre_processor: Optional pipeline used to pre-process the datasets.
@@ -44,14 +41,13 @@ def plot_model_selection(algorithms: Union[sklearn.base.RegressorMixin, sklearn.
 
     """
 
-    return ModelSelection(algorithms=algorithms, datasets=datasets, target=target, pre_processor=pre_processor,
+    return ModelSelection(estimators=estimators, datasets=datasets, target=target, pre_processor=pre_processor,
                           k_folds=k_folds).plot(title=title)
 
 
-class ModelSelection:
+class ModelSelection(CrossValidatorBase):
     def __init__(self,
-                 algorithms: Union[
-                     sklearn.base.RegressorMixin, sklearn.base.ClassifierMixin, Dict[str, sklearn.base.BaseEstimator]],
+                 estimators: Union[BaseEstimator, Dict[str, BaseEstimator]],
                  datasets: Union[pd.DataFrame, Dict[str, pd.DataFrame]],
                  target: str,
                  pre_processor: Optional[Pipeline] = None,
@@ -63,7 +59,7 @@ class ModelSelection:
         """
 
         Args:
-            algorithms: sklearn estimator or a Dict of algorithms to cross-validate, keyed by string name/code.
+            estimators: sklearn estimator or a Dict of algorithms to cross-validate, keyed by string name/code.
             datasets: pandas DataFrame or a dict of DataFrames, keyed by string name/code.
             target: target column
             pre_processor: Optional pipeline used to pre-process the datasets.
@@ -74,80 +70,11 @@ class ModelSelection:
              datasets, so is more useful when testing different algorithms.
             random_state: Optional random seed
         """
+
         self._logger = logging.getLogger(name=__class__.__name__)
-        self.pre_processor: Pipeline = pre_processor
-        if isinstance(algorithms, sklearn.base.BaseEstimator):
-            self.algorithms = {algorithms.__class__.__name__: algorithms}
-        else:
-            self.algorithms = algorithms
-        if isinstance(datasets, pd.DataFrame):
-            self.datasets = {'Dataset': datasets}
-        else:
-            self.datasets = datasets
-        self.target = target
-        self.k_folds: int = k_folds
 
-        self.is_classifier: bool = is_classifier(list(self.algorithms.values())[0])
-        self.is_regressor: bool = is_regressor(list(self.algorithms.values())[0])
-        if scorer is not None:
-            self.scorer = scorer
-        else:
-            self.scorer = classification_scorers[list(classification_scorers.keys())[0]] if self.is_classifier else \
-                regression_scorers[list(regression_scorers.keys())[0]]
-
-        if metrics is not None:
-            self.metrics = metrics
-        else:
-            self.metrics = classification_metrics if self.is_classifier else regression_metrics
-
-        self.group: pd.Series = group
-        self.random_state: Optional[int] = random_state
-
-        self.features_in: List[str] = [col for col in self.datasets[list(self.datasets.keys())[0]] if
-                                       col != self.target]
-
-        self._data: Optional[Dict] = None
-        self._num_algorithms: int = len(list(self.algorithms.keys()))
-        self._num_datasets: int = len(list(self.datasets.keys()))
-
-        if self._num_algorithms > 1 and self._num_datasets > 1:
-            raise NotImplementedError("Cannot have multiple algorithms and multiple datasets.")
-
-    @property
-    def data(self) -> Optional[Dict]:
-        if self.metrics is None:
-            cv_kwargs: Dict = dict()
-        else:
-            cv_kwargs: Dict = dict(return_estimator=True, return_indices=True, error_score=np.nan)
-
-        if self._data is not None:
-            results = self._data
-        else:
-            results: Dict = {}
-            for data_key, data in self.datasets.items():
-                self._logger.info(f"Commencing Cross Validation for dataset {data_key}")
-                results[data_key] = {}
-                x: pd.DataFrame = data[self.features_in]
-                y: pd.DataFrame = data[self.target]
-                if self.pre_processor:
-                    x = self.pre_processor.set_output(transform="pandas").fit_transform(X=x)
-
-                for algo_key, algo in self.algorithms.items():
-                    kfold = model_selection.KFold(n_splits=self.k_folds, random_state=self.random_state, shuffle=True)
-                    res = cross_validate(algo, x, y, cv=kfold, scoring=self.scorer, **cv_kwargs)
-                    if self.metrics is not None:
-                        res['metrics'], res['metrics_group'] = self.calculate_metrics(x=x, y=y,
-                                                                                      estimators=res['estimator'],
-                                                                                      indices=res['indices'],
-                                                                                      group=self.group)
-                    results[data_key][algo_key] = res
-                    res_mean = res[f"test_score"].mean()
-                    res_std = res[f"test_score"].std()
-                    self._logger.info(f"CV Results for {algo_key}: Mean = {res_mean}, SD = {res_std}")
-
-            self._data = results
-
-        return results
+        super().__init__(estimators=estimators, datasets=datasets, target=target, pre_processor=pre_processor,
+                         cv=k_folds, scorer=scorer, metrics=metrics, group=group, random_state=random_state)
 
     def plot(self,
              metrics: Optional[Union[str, List[str]]] = None,
@@ -176,6 +103,7 @@ class ModelSelection:
 
         """
 
+        # Access the attributes of the CrossValidationResult dataclass
         data: pd.DataFrame = self.get_cv_scores()
         data = data.droplevel(level=0, axis=1) if self._num_datasets == 1 else data.droplevel(level=1, axis=1)
 
@@ -198,7 +126,7 @@ class ModelSelection:
         norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
         cmap = matplotlib.cm.get_cmap('RdYlGn')
 
-        subtitle: str = f'Cross Validation folds={self.k_folds}'
+        subtitle: str = f'Cross Validation folds={str(self.cv)}'
         if title is None:
             title = subtitle
         else:
@@ -271,7 +199,7 @@ class ModelSelection:
             a plotly GraphObjects.Figure
 
         """
-        algorithms: list[str] = list(self.algorithms.keys())
+        algorithms: list[str] = list(self.estimators.keys())
         algorithm: str = algorithms[0] if algorithm is None else algorithm
         if algorithm not in algorithms:
             raise KeyError(f"Algorithm {algorithm} is not in the list of available algorithms: {algorithms}")
@@ -299,7 +227,7 @@ class ModelSelection:
             'metric')
 
         if title is None:
-            title = f'Model by Group Test on {algorithm} with {self.k_folds} folds'
+            title = f'Model by Group Test on {algorithm} with cv = {str(self.cv)}'
 
         num_plots: int = len(metrics) if len(metrics) > 0 else 1
         num_cols: int = num_plots if col_wrap is None else col_wrap
@@ -328,94 +256,14 @@ class ModelSelection:
 
         return fig
 
-    def get_model_by_group_data(self, algorithm, dataset):
-        results: dict = {}
-        by_group_score_chunks: list = []
-        by_group_metric_chunks: list = []
-        for grp in self.group.unique():
-            grp_index: pd.Index = self.group.loc[self.group == grp].index
-            x: pd.DataFrame = self.datasets[dataset][self.features_in].loc[grp_index]
-            y: pd.DataFrame = self.datasets[dataset][self.target].loc[grp_index]
-            if self.pre_processor:
-                x = self.pre_processor.set_output(transform="pandas").fit_transform(X=x)
-            kfold = model_selection.KFold(n_splits=self.k_folds, random_state=self.random_state, shuffle=True)
-            res = cross_validate(self.algorithms[algorithm], x, y, cv=kfold, scoring=self.scorer, return_estimator=True,
-                                 return_indices=True)
-            by_group_score_chunks.append(pd.Series(res['test_score'], name=grp))
-            if self.metrics is not None:
-                res['metrics'], _ = self.calculate_metrics(x=x, y=y,
-                                                           estimators=res['estimator'],
-                                                           indices=res['indices'],
-                                                           group=None)
-            results[grp] = res
-            by_group_metric_chunks.append(
-                pd.DataFrame(res['metrics']).assign(group=grp).rename_axis('fold', axis='index'))
-        by_group_metrics: pd.DataFrame = pd.concat(by_group_metric_chunks)
-        #                                   .reset_index().melt(id_vars=['fold', 'group'],
-        #                                                                                       value_vars=list(
-        #                                                                                           self.metrics.keys()),
-        #                                                                                       var_name='metric'))
-        # by_group_metrics = by_group_metrics.set_index(['fold', 'metric', 'group']).unstack(level=-1)
-        # by_group_metrics = by_group_metrics.droplevel(level=0, axis=1).reset_index(-1)
-        by_group_scores = pd.concat(by_group_score_chunks, axis=1)
-
-        return by_group_metrics, by_group_scores
+    def get_model_by_group_data(self, estimator, dataset) -> tuple[pd.DataFrame, pd.DataFrame]:
+        return super().get_model_by_group_data(estimator, dataset)
 
     def get_cv_scores(self) -> pd.DataFrame:
-        chunks: List = []
-        for data_key, data in self.datasets.items():
-            for algo_key, algo in self.algorithms.items():
-                chunks.append(pd.Series(self.data[data_key][algo_key][f"test_score"], name=(data_key, algo_key)))
-        return pd.concat(chunks, axis=1)
+        return super().get_cv_scores()
 
     def get_cv_metrics(self, metrics, by_group: bool = False) -> pd.DataFrame:
-        chunks: List = []
-        metric_key = "metrics_group" if by_group else "metrics"
-        for data_key, data in self.datasets.items():
-            for algo_key, algo in self.algorithms.items():
-                for metric in metrics:
-                    chunks.append(pd.DataFrame(self.data[data_key][algo_key][metric_key][metric]).assign(
-                        **dict(data_key=data_key, algo_key=algo_key, metric=metric)))
-        res: pd.DataFrame = pd.concat(chunks, axis=0).set_index(['data_key', 'algo_key'], append=True).rename(
-            columns={0: 'value'})
-        res.index.names = ['fold', 'data_key', 'algo_key']
-        return res
+        return super().get_cv_metrics(metrics, by_group)
 
     def calculate_metrics(self, x, y, estimators, indices, group) -> Tuple[Dict, Dict]:
-        metric_results: Dict = {}
-        metric_results_group: Dict = {}
-
-        for k, fn_metric in self.metrics.items():
-            metric_values: List = []
-            metric_groups: Dict = {}
-            for estimator, test_indexes in zip(estimators, indices['test']):
-                y_true = y[y.index[test_indexes]]
-                y_est = estimator.predict(x.loc[x.index[test_indexes], :])
-                if isinstance(y_est, pd.DataFrame) and y_est.shape[1] == 1:
-                    y_est = y_est.iloc[:, 0]
-                metric_values.append(fn_metric(y_true, y_est))
-                if group is not None:
-                    # calculate the metric by each group in the group series.
-                    y_est = pd.merge(left=pd.Series(y_est, name='y_est', index=x.index[test_indexes]),
-                                     right=group, left_index=True, right_index=True)
-                    y_est_grouped = y_est.groupby([group.name])
-                    grouped_results = [y_est_grouped.get_group(x) for x in y_est_grouped.groups]
-                    for grp_res in grouped_results:
-                        group_value = str(grp_res[group.name].iloc[0])
-                        group_metric_results = fn_metric(y_true[grp_res.index], grp_res['y_est'].values)
-                        if group_value not in metric_groups.keys():
-                            metric_groups[group_value] = [group_metric_results]
-                        else:
-                            metric_groups[group_value].append(group_metric_results)
-            metric_results[k] = metric_values
-            if group is not None:
-                metric_results_group[k] = metric_groups
-
-        return metric_results, metric_results_group
-
-# if __name__ == '__main__':
-#
-#     for i in range(0, 7):
-#         print(subplot_index(i, col_wrap=3))
-#
-#     print('done')
+        return super().calculate_metrics(x, y, estimators, indices, group)

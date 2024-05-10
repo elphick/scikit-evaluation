@@ -60,7 +60,7 @@ pp
 # The box colors are scaled to provide a relative indication of performance based on the score (Kudos to
 # `Shah Newaz Khan <https://towardsdatascience.com/applying-a-custom-colormap-with-plotly-boxplots-5d3acf59e193>`_)
 
-fig = plot_model_selection(algorithms=models_to_test, datasets=xy, target='class', pre_processor=pp)
+fig = plot_model_selection(estimators=models_to_test, datasets=xy, target='class', pre_processor=pp)
 fig.update_layout(height=600)
 fig
 
@@ -73,7 +73,7 @@ fig
 # If metrics as provided additional subplots are provided - however since metrics have no concept of "greater-is-good"
 # like a scorer, they are not coloured.
 
-ms: ModelSelection = ModelSelection(algorithms=models_to_test, datasets=xy, target='class', pre_processor=pp,
+ms: ModelSelection = ModelSelection(estimators=models_to_test, datasets=xy, target='class', pre_processor=pp,
                                     k_folds=30)
 fig = ms.plot(title='Model Selection', metrics='f1')
 fig.update_layout(height=600)
@@ -83,7 +83,7 @@ plotly.io.show(fig)  # this call to show will set the thumbnail for use in the g
 # %%
 # View the data
 
-ms.data
+ms.results
 
 # %%
 # Regressor Model Selection
@@ -101,7 +101,7 @@ group: pd.Series = pd.Series(x['sex'] > 0, name='grp_sex', index=x.index)
 pp: Pipeline = make_pipeline(StandardScaler())
 models_to_test: Dict = Models().fast_regressors()
 
-ms: ModelSelection = ModelSelection(algorithms=models_to_test, datasets=xy, target='progression', pre_processor=pp,
+ms: ModelSelection = ModelSelection(estimators=models_to_test, datasets=xy, target='progression', pre_processor=pp,
                                     k_folds=30, scorer='r2', group=group,
                                     metrics={'moe': metrics.moe_95, 'me': metrics.mean_error})
 # %%
@@ -131,9 +131,9 @@ fig
 # Next we will demonstrate a single Algorithm with multiple datasets.  This is useful when exploring features that
 # improve model performance.
 
-datasets: Dict = {'DS1': xy, 'DS2': xy.sample(frac=0.4)}
+datasets: Dict = {'DS1': xy, 'DS2': xy.drop(columns=['age']).sample(frac=0.4)}
 
-fig = plot_model_selection(algorithms=LinearRegression(), datasets=datasets, target='progression', pre_processor=pp,
+fig = plot_model_selection(estimators=LinearRegression(), datasets=datasets, target='progression', pre_processor=pp,
                            k_folds=30)
 fig.update_layout(height=600)
 fig
