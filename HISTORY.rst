@@ -1,3 +1,12 @@
+Sklearn_Viz 0.6.4 (2024-05-11)
+==============================
+
+Features
+--------
+
+- The Errors object plot method has been improved.  It is now square as it should be for better interpretation of residuals, with the y=x line at 45 degrees.  Still a glitch with the example top marginal y-axis limits.  Example in the gallery has been updated. (#27)
+
+
 Sklearn_Viz 0.6.3 (2024-05-11)
 ==============================
 

@@ -1,5 +1,4 @@
 """
-==============
 Plot Residuals
 ==============
 
@@ -28,9 +27,7 @@ logging.basicConfig(level=logging.DEBUG,
 # ---------------------------------
 # We mimic a simple model fit per the sklearn example.
 
-
 # Load the diabetes dataset
-# diabetes_X, diabetes_y = datasets.load_diabetes(return_X_y=True)
 diabetes = datasets.load_diabetes(as_frame=True)
 X, y = diabetes.data, diabetes.target
 y.name = "progression"
@@ -47,12 +44,13 @@ mdl.fit(X_train, y_train)
 # Demonstrate the plot
 # --------------------
 
-
 obj_res: Errors = Errors(mdl=mdl, x_test=X_test, y_test=y_test)
 fig = obj_res.plot()
 # noinspection PyTypeChecker
-plotly.io.show(fig)  # this call to show will set the thumbnail for use in the gallery
+plotly.io.show(fig)
 
+# %%
+# Add marginal histograms
 
-
-
+fig = obj_res.plot(marginal=True)
+fig
