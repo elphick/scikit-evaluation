@@ -4,17 +4,13 @@ on:
   push:
     branches:
       - main
-  workflow_run:
-    workflows: [ "Run Tests with Poetry" ]
-    types:
-      - completed
 
 permissions:
   contents: read
 
 jobs:
   check_version:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       version_changed: ${{ steps.check.outputs.version_changed }}
