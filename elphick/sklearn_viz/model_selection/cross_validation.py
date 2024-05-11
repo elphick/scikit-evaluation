@@ -236,12 +236,12 @@ class CrossValidatorBase(ABC):
             y: pd.DataFrame = self.datasets[dataset][self.target].loc[grp_index]
             if self.pre_processor:
                 x = self.pre_processor.set_output(transform="pandas").fit_transform(X=x)
+            cv = self.cv
             if isinstance(self.cv, int):
                 cv = KFold(n_splits=self.cv, random_state=self.random_state, shuffle=True)
-            else:
-                cv = self.cv
+
             res = cross_validate(self.estimators[estimator], x, y, cv=cv, scoring=self.scorer, return_estimator=True,
-                                 return_indices=True)
+                                 return_indices=True, n_jobs=self.n_jobs)
             by_group_score_chunks.append(pd.Series(res['test_score'], name=grp))
             if self.metrics is not None:
                 res['metrics'], _ = self.calculate_metrics(x=x, y=y,

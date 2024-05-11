@@ -24,7 +24,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from elphick.sklearn_viz.model_selection import LearningCurve, plot_learning_curve
+from elphick.sklearn_viz.model_selection import LearningCurve, plot_learning_curve, metrics
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
@@ -42,17 +42,17 @@ X, y = load_digits(return_X_y=True)
 #
 # The pipeline will likely include some pre-processing.
 
-pipe: Pipeline = make_pipeline(StandardScaler(), GaussianNB())
+pipe: Pipeline = make_pipeline(StandardScaler(), GaussianNB()).set_output(transform='pandas')
 pipe
 
 # %%
 # Plot using the function
 # -----------------------
 
-cv = ShuffleSplit(n_splits=50, test_size=0.2, random_state=0)
-fig = plot_learning_curve(pipe, x=X, y=y, cv=cv)
-fig.update_layout(height=600)
-fig
+# cv = ShuffleSplit(n_splits=50, test_size=0.2, random_state=0)
+# fig = plot_learning_curve(pipe, x=X, y=y, cv=cv)
+# fig.update_layout(height=600)
+# fig
 
 # %%
 # Plot using the object
@@ -60,16 +60,16 @@ fig
 #
 # Plotting using the object allows access to the underlying data.
 
-lc: LearningCurve = LearningCurve(pipe, x=X, y=y, cv=30)
-fig = lc.plot(title='Learning Curve')
-fig.update_layout(height=600)
-# noinspection PyTypeChecker
-plotly.io.show(fig)  # this call to show will set the thumbnail for use in the gallery
+# lc: LearningCurve = LearningCurve(pipe, x=X, y=y, cv=30, n_jobs=-2)
+# fig = lc.plot(title='Learning Curve')
+# fig.update_layout(height=600)
+# # noinspection PyTypeChecker
+# plotly.io.show(fig)  # this call to show will set the thumbnail for use in the gallery
 
 # %%
 # View the data
 
-lc.data
+# lc.results
 
 # %%
 # Regressor Learning Curve
@@ -79,9 +79,25 @@ diabetes = load_diabetes(as_frame=True)
 X, y = diabetes.data, diabetes.target
 y.name = "progression"
 
-pipe: Pipeline = make_pipeline(StandardScaler(), RidgeCV())
+pipe: Pipeline = make_pipeline(StandardScaler(), RidgeCV()).set_output(transform='pandas')
 pipe
 
-fig = plot_learning_curve(pipe, x=X, y=y)
+# %%
+lc: LearningCurve = LearningCurve(pipe, x=X, y=y, cv=10)
+fig = lc.plot(title='Learning Curve')
 fig.update_layout(height=600)
-fig
+fig.show()
+
+# %%
+# Regressor Learning Curve with Metrics
+# -------------------------------------
+
+lc: LearningCurve = LearningCurve(pipe, x=X, y=y,
+                                  metrics={'r2': metrics.r2_score, 'mse': metrics.mean_squared_error},
+                                  cv=10)
+fig = lc.plot(title='Learning Curve with Metrics', metrics=['r2', 'mse'])
+fig.update_layout(height=600)
+fig.show()
+
+df = lc.results.get_results()
+print('done')
