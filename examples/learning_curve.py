@@ -49,31 +49,41 @@ pipe
 # Plot using the function
 # -----------------------
 
-# cv = ShuffleSplit(n_splits=50, test_size=0.2, random_state=0)
-# fig = plot_learning_curve(pipe, x=X, y=y, cv=cv)
-# fig.update_layout(height=600)
-# fig
+cv = ShuffleSplit(n_splits=50, test_size=0.2, random_state=0)
+fig = plot_learning_curve(pipe, x=X, y=y, cv=cv)
+fig.update_layout(height=600)
+# noinspection PyTypeChecker
+plotly.io.show(fig)
 
 # %%
 # Plot using the object
 # ---------------------
 #
 # Plotting using the object allows access to the underlying data.
+#
+# .. tip::
+#    You can use n_jobs to parallelize the computation.
 
-# lc: LearningCurve = LearningCurve(pipe, x=X, y=y, cv=30, n_jobs=-2)
-# fig = lc.plot(title='Learning Curve')
-# fig.update_layout(height=600)
-# # noinspection PyTypeChecker
-# plotly.io.show(fig)  # this call to show will set the thumbnail for use in the gallery
+lc: LearningCurve = LearningCurve(pipe, x=X, y=y, cv=5, n_jobs=5)
+fig = lc.plot(title='Learning Curve').update_layout(height=600)
+fig
 
 # %%
 # View the data
 
-# lc.results
+lc.results
+
+# %%
+# Results as a dataframe
+
+df = lc.results.get_results()
+df.head(10)
 
 # %%
 # Regressor Learning Curve
 # ------------------------
+#
+# This example uses a regression model.
 
 diabetes = load_diabetes(as_frame=True)
 X, y = diabetes.data, diabetes.target
@@ -83,21 +93,24 @@ pipe: Pipeline = make_pipeline(StandardScaler(), RidgeCV()).set_output(transform
 pipe
 
 # %%
-lc: LearningCurve = LearningCurve(pipe, x=X, y=y, cv=10)
-fig = lc.plot(title='Learning Curve')
-fig.update_layout(height=600)
-fig.show()
+lc: LearningCurve = LearningCurve(pipe, x=X, y=y, cv=5)
+fig = lc.plot(title='Learning Curve').update_layout(height=600)
+fig
 
 # %%
-# Regressor Learning Curve with Metrics
-# -------------------------------------
+# Learning Curve with Metrics
+# ---------------------------
+#
+# While a model is fitted based on the defined scorer, we may be interested in other metrics.
+# The `metrics` parameter allows us to define additional metrics to calculate.
 
 lc: LearningCurve = LearningCurve(pipe, x=X, y=y,
-                                  metrics={'r2': metrics.r2_score, 'mse': metrics.mean_squared_error},
-                                  cv=10)
-fig = lc.plot(title='Learning Curve with Metrics', metrics=['r2', 'mse'])
-fig.update_layout(height=600)
-fig.show()
+                                  metrics={'mse': metrics.mean_squared_error, 'moe': metrics.moe_95},
+                                  cv=5)
+fig = lc.plot(title='Learning Curve with Metrics', metrics=['mse', 'moe'], col_wrap=2).update_layout(height=800)
+fig
 
-df = lc.results.get_results()
-print('done')
+# %%
+# Learning Curve for a metric without the scorer
+fig = lc.plot(title='Learning Curve - Metric, no scorer', metrics=['moe'], plot_scorer=False).update_layout(height=700)
+fig

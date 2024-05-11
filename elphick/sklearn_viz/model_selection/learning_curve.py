@@ -1,4 +1,5 @@
 import logging
+import math
 import multiprocessing
 from dataclasses import dataclass
 from datetime import timedelta, datetime
@@ -8,6 +9,7 @@ import matplotlib
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from sklearn.base import is_classifier, is_regressor
 from sklearn.model_selection import learning_curve, train_test_split, StratifiedKFold, KFold
 from sklearn.pipeline import Pipeline
@@ -17,20 +19,20 @@ from elphick.sklearn_viz.utils import log_timer
 
 @dataclass
 class LearningCurveResult:
-    train_scores: np.ndarray
-    val_scores: np.ndarray
-    train_sizes: np.ndarray
+    training_scores: np.ndarray
+    validation_scores: np.ndarray
+    training_sizes: np.ndarray
     metrics: dict[str, dict[str, np.ndarray]] = None
 
     def get_results(self) -> pd.DataFrame:
-        col_names = [f"train_count_{n}" for n in self.train_sizes]
-        train: pd.DataFrame = pd.DataFrame(self.train_scores.T, columns=col_names)
-        val: pd.DataFrame = pd.DataFrame(self.val_scores.T, columns=col_names)
+        col_names = [f"train_count_{n}" for n in self.training_sizes]
+        train: pd.DataFrame = pd.DataFrame(self.training_scores.T, columns=col_names)
+        val: pd.DataFrame = pd.DataFrame(self.validation_scores.T, columns=col_names)
 
         if self.metrics is not None:
             for metric_name in self.metrics.keys():
-                train_metric_df = pd.DataFrame(self.metrics[metric_name]['train'].T, columns=col_names)
-                val_metric_df = pd.DataFrame(self.metrics[metric_name]['val'].T, columns=col_names)
+                train_metric_df = pd.DataFrame(self.metrics[metric_name]['training'].T, columns=col_names)
+                val_metric_df = pd.DataFrame(self.metrics[metric_name]['validation'].T, columns=col_names)
                 train = pd.concat([train, train_metric_df], axis=1)
                 val = pd.concat([val, val_metric_df], axis=1)
 
@@ -38,13 +40,13 @@ class LearningCurveResult:
                          axis='index').reset_index(drop=True)
 
     def get_scorer_results(self, dataset_type) -> np.ndarray:
-        return self.train_scores if dataset_type == 'training' else self.val_scores
+        return self.training_scores if dataset_type == 'training' else self.validation_scores
 
     def get_metric_results(self, dataset_type, metric_name) -> np.ndarray:
         return self.metrics[metric_name][dataset_type]
 
     def get_plot_data(self, key, dataset_type) -> tuple:
-        x = list(self.train_sizes)
+        x = list(self.training_sizes)
         if key == 'scorer':
             data = self.get_scorer_results(dataset_type=dataset_type)
         else:
@@ -136,7 +138,6 @@ class LearningCurve:
         return n_cores
 
     @property
-    @log_timer
     def results(self) -> Optional[pd.DataFrame]:
         if self._results is None:
             start_time = datetime.now()  # Record the start time
@@ -160,8 +161,9 @@ class LearningCurve:
                                                                       train_sizes=self.train_sizes,
                                                                       scoring=self.scorer, cv=self.cv,
                                                                       n_jobs=self.n_jobs)
-            results: LearningCurveResult = LearningCurveResult(train_scores=train_scores, val_scores=val_scores,
-                                                               train_sizes=train_size_abs)
+            results: LearningCurveResult = LearningCurveResult(training_scores=train_scores,
+                                                               validation_scores=val_scores,
+                                                               training_sizes=train_size_abs)
 
         else:
             # Use the ModelSelection class with the provided metrics
@@ -173,7 +175,7 @@ class LearningCurve:
         train_scores: list = []
         val_scores: list = []
         train_size_abs: list = []
-        metrics: dict = {metric: {'train': [], 'val': []} for metric in self.metrics.keys()}
+        metrics: dict = {metric: {'training': [], 'validation': []} for metric in self.metrics.keys()}
 
         # Determine the cross-validation strategy based on the estimator type
         if self.is_classifier:
@@ -185,7 +187,7 @@ class LearningCurve:
 
             train_scores_fold: list = []
             val_scores_fold: list = []
-            metrics_fold: dict = {metric: {'train': [], 'val': []} for metric in self.metrics.keys()}
+            metrics_fold: dict = {metric: {'training': [], 'validation': []} for metric in self.metrics.keys()}
 
             for i, (train_index, val_index) in enumerate(cv.split(self.X, self.y)):
                 X_train, X_val = self.X.iloc[train_index], self.X.iloc[val_index]
@@ -215,44 +217,60 @@ class LearningCurve:
                         train_metric = metric_func(y_train, self.estimator.predict(X_train))
                         val_metric = metric_func(y_val, self.estimator.predict(X_val))
 
-                        metrics_fold[metric_name]['train'].append(train_metric)
-                        metrics_fold[metric_name]['val'].append(val_metric)
+                        metrics_fold[metric_name]['training'].append(train_metric)
+                        metrics_fold[metric_name]['validation'].append(val_metric)
 
             # Average the results over the folds
             train_scores.append(train_scores_fold)
             val_scores.append(val_scores_fold)
             for metric_name in metrics.keys():
-                metrics[metric_name]['train'].append(metrics_fold[metric_name]['train'])
-                metrics[metric_name]['val'].append(metrics_fold[metric_name]['val'])
+                metrics[metric_name]['training'].append(metrics_fold[metric_name]['training'])
+                metrics[metric_name]['validation'].append(metrics_fold[metric_name]['validation'])
 
         # Convert lists to numpy arrays
         for metric_name in metrics.keys():
-            metrics[metric_name]['train'] = np.array(metrics[metric_name]['train'])
-            metrics[metric_name]['val'] = np.array(metrics[metric_name]['val'])
+            metrics[metric_name]['training'] = np.array(metrics[metric_name]['training'])
+            metrics[metric_name]['validation'] = np.array(metrics[metric_name]['validation'])
 
-        results = LearningCurveResult(train_scores=np.array(train_scores), val_scores=np.array(val_scores),
-                                      train_sizes=np.array(train_size_abs), metrics=metrics)
+        results = LearningCurveResult(training_scores=np.array(train_scores), validation_scores=np.array(val_scores),
+                                      training_sizes=np.array(train_size_abs), metrics=metrics)
 
         return results
 
     def plot(self,
              title: Optional[str] = None,
              metrics: Optional[list[str]] = None,
-             col_wrap: int = 1) -> go.Figure:
+             col_wrap: int = 1,
+             plot_scorer: bool = True) -> go.Figure:
         """Create the plot
 
         Args:
             title: title for the plot
             metrics: Optional list of metric keys to plot
             col_wrap: The number of columns to use for the facet grid if plotting metrics.
+            plot_scorer: If True, plot the scorer.  Use False to plot only the metrics.
 
         Returns:
             a plotly GraphObjects.Figure
 
         """
 
-        x, y_train, y_train_lo, y_train_hi = self.results.get_plot_data(key='scorer', dataset_type='training')
-        x, y_val, y_val_lo, y_val_hi = self.results.get_plot_data(key='scorer', dataset_type='validation')
+        # Determine the number of plots to create, their keys, and titles
+        total_plots = 0
+        plot_keys = []
+        subplot_titles = []
+        if plot_scorer:
+            total_plots += 1
+            plot_keys.append('scorer')
+            subplot_titles.append(str(self.scorer))
+        if metrics:
+            total_plots += len(metrics)
+            plot_keys += metrics
+            subplot_titles += metrics
+
+        num_rows, num_cols, subplot_order = self.calculate_grid_and_subplot_order(total_plots, col_wrap)
+
+        fig = make_subplots(rows=num_rows, cols=num_cols, subplot_titles=subplot_titles)
 
         subtitle: str = f'Cross Validation: {self.cv}'
         if title is None:
@@ -260,7 +278,29 @@ class LearningCurve:
         else:
             title = title + '<br>' + subtitle
 
-        fig = go.Figure()
+        for key, y_label, (row, col) in zip(plot_keys, subplot_titles, subplot_order):
+            self._add_subplot(fig=fig, key=key, y_label=y_label, row=row, col=col)
+
+        fig.update_layout(title=title, showlegend=True)
+
+        return fig
+
+    @staticmethod
+    def calculate_grid_and_subplot_order(total_plots, col_wrap):
+        num_cols = min(total_plots, col_wrap)
+        num_rows = math.ceil(total_plots / num_cols)
+
+        subplot_order = [(row, col) for row in range(1, num_rows + 1) for col in range(1, num_cols + 1)]
+        subplot_order = subplot_order[:total_plots]  # Trim to the actual number of plots
+
+        return num_rows, num_cols, subplot_order
+
+    def _add_subplot(self, fig: go.Figure, key: str, y_label: str, row: int, col: int) -> go.Figure:
+        x, y_train, y_train_lo, y_train_hi = self.results.get_plot_data(key=key, dataset_type='training')
+        x, y_val, y_val_lo, y_val_hi = self.results.get_plot_data(key=key, dataset_type='validation')
+
+        # Add legend only for the first subplot
+        show_legend = (row == 1 and col == 1)
 
         fig.add_trace(go.Scatter(
             x=x,
@@ -268,14 +308,16 @@ class LearningCurve:
             line=dict(color='royalblue'),
             mode='lines',
             name='training',
-        ))
+            showlegend=show_legend,
+        ), row=row, col=col)
         fig.add_trace(go.Scatter(
             x=x,
             y=y_val,
             line=dict(color='orange'),
             mode='lines',
             name='validation',
-        ))
+            showlegend=show_legend,
+        ), row=row, col=col)
         fig.add_trace(go.Scatter(
             x=x + x[::-1],  # x, then x reversed
             y=y_train_hi + y_train_lo[::-1],  # upper, then lower reversed
@@ -283,19 +325,21 @@ class LearningCurve:
             fillcolor=f"rgba{str(matplotlib.colors.to_rgba('royalblue', 0.4))}",
             line=dict(color='rgba(255,255,255,0)'),
             hoverinfo="skip",
+            showlegend=show_legend,
             name='training error +/- 1SD'
-        ))
+        ), row=row, col=col)
         fig.add_trace(go.Scatter(
             x=x + x[::-1],  # x, then x reversed
             y=y_val_hi + y_val_lo[::-1],  # upper, then lower reversed
             fill='toself',
-            # fillcolor=f"rgba{str(matplotlib.colors.to_rgba('orange', 0.5))}",
             fillcolor="rgba(255, 165, 0, 0.5)",
             line=dict(color='rgba(255,255,255,0)'),
             hoverinfo="skip",
-            showlegend=True,
+            showlegend=show_legend,
             name='validation error +/- 1SD'
-        ))
-        fig.update_layout(title=title, showlegend=True, yaxis_title=self.scorer,
-                          xaxis_title='Number of samples in the training set')
+        ), row=row, col=col)
+
+        fig.update_xaxes(title_text="Number of training samples", row=row, col=col)
+        fig.update_yaxes(title_text=y_label, row=row, col=col)
+
         return fig
