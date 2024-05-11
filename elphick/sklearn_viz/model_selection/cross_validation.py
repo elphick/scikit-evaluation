@@ -4,12 +4,13 @@ import multiprocessing
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, Union, Optional
 from typing import List
 
 import numpy as np
 import pandas as pd
+from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator, is_classifier, is_regressor
 from sklearn.model_selection import KFold, cross_validate
 
@@ -39,7 +40,8 @@ class CrossValidatorBase(ABC):
                  metrics: Optional[Dict[str, Any]],
                  group: Any,
                  random_state: int,
-                 n_jobs: Union[int, str] = 1):
+                 n_jobs: Union[int, str] = 1,
+                 verbosity: int = 1):
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -79,6 +81,7 @@ class CrossValidatorBase(ABC):
         self.group: Any = group
         self.random_state: int = random_state
         self.n_jobs: int = n_jobs
+        self.verbosity: int = verbosity
 
         self._logger: logging.Logger = logging.getLogger(self.__class__.__name__)
         self._results: Optional[CrossValidationResult] = None
@@ -100,57 +103,70 @@ class CrossValidatorBase(ABC):
     @property
     def results(self) -> Optional[Dict[str, Dict[str, CrossValidationResult]]]:
         if self._results is None:
-
-            _tic = datetime.now()
+            start_time = datetime.now()  # Record the start time
+            if self.verbosity > 0:
+                self._logger.info(f"Commencing cross validation...")
 
             d_results: Dict = {data_key: {algo_key: {} for algo_key in self.estimators.keys()} for data_key in
                                self.datasets.keys()}
+
+            # Run the tasks in a loop
             for data_key, data in self.datasets.items():
-                self._logger.info(f"Commencing Cross Validation for dataset {data_key}")
-                d_results[data_key] = {}
-                # Ensure that only the features present in the dataset are used
-                features_in_dataset = list(set(self.features_in).intersection(set(data.columns)))
-                x: pd.DataFrame = data[features_in_dataset]
-                y: pd.DataFrame = data[self.target]
-                if self.pre_processor:
-                    x = self.pre_processor.set_output(transform="pandas").fit_transform(X=x)
-
                 for estimator_key, estimator in self.estimators.items():
-                    if isinstance(self.cv, int):
-                        cv = KFold(n_splits=self.cv, random_state=self.random_state, shuffle=True)
-                    else:
-                        cv = self.cv
-                    res = cross_validate(estimator, x, y, cv=cv, scoring=self.scorer, return_train_score=True,
-                                         return_estimator=True, return_indices=True, error_score=np.nan,
-                                         n_jobs=self.n_jobs)
-                    if self.metrics is not None:
-                        res['metrics'], res['metrics_group'] = self.calculate_metrics(x=x, y=y,
-                                                                                      estimators=res['estimator'],
-                                                                                      indices=res['indices'],
-                                                                                      group=self.group)
-                    # Convert the results to a CrossValidationResult instance and assign it
-                    d_results[data_key][estimator_key] = CrossValidationResult(
-                        test_scores=res['test_score'],
-                        train_scores=res['train_score'],
-                        fit_times=res['fit_time'],
-                        score_times=res['score_time'],
-                        estimator=res['estimator'],
-                        metrics=res['metrics'],
-                        metrics_group=res['metrics_group']
-                    )
-
-                    res_mean = res[f"test_score"].mean()
-                    res_std = res[f"test_score"].std()
-
-                    self._logger.info(f"CV Results for {estimator_key}: Mean = {res_mean}, SD = {res_std}")
+                    data_key, estimator_key, res = self.cross_validate_task(data_key, data, estimator_key, estimator)
+                    d_results[data_key][estimator_key] = res
 
             self._results = d_results
 
-            self._logger.info(
-                f"Cross Validation complete in {datetime.now() - _tic} using {self.n_cores} "
-                f"worker{'s' if self.n_cores > 1 else ''}")
+            if self.verbosity > 0:
+                duration = str(timedelta(seconds=round((datetime.now() - start_time).total_seconds())))
+                self._logger.info(f"Cross validation complete in {duration} using {self.n_cores} "
+                                  f"worker{'s' if self.n_cores > 1 else ''}")
 
         return self._results
+
+    def cross_validate_task(self, data_key, data, estimator_key, estimator):
+        start_time = datetime.now()  # Record the start time
+        if self.verbosity > 1:
+            self._logger.info(f"Starting cross-validation for {data_key} with {estimator_key}")
+
+        # Ensure that only the features present in the dataset are used
+        features_in_dataset = list(set(self.features_in).intersection(set(data.columns)))
+        x: pd.DataFrame = data[features_in_dataset]
+        y: pd.DataFrame = data[self.target]
+        if self.pre_processor:
+            x = self.pre_processor.set_output(transform="pandas").fit_transform(X=x)
+
+        if isinstance(self.cv, int):
+            cv = KFold(n_splits=self.cv, random_state=self.random_state, shuffle=True)
+        else:
+            cv = self.cv
+        res = cross_validate(estimator, x, y, cv=cv, scoring=self.scorer, return_train_score=True,
+                             return_estimator=True, return_indices=True, error_score=np.nan,
+                             n_jobs=self.n_jobs)
+        if self.metrics is not None:
+            res['metrics'], res['metrics_group'] = self.calculate_metrics(x=x, y=y,
+                                                                          estimators=res['estimator'],
+                                                                          indices=res['indices'],
+                                                                          group=self.group)
+        if self.verbosity > 1:
+            duration = str(timedelta(seconds=round((datetime.now() - start_time).total_seconds())))
+            res_mean = res[f"test_score"].mean()
+            res_std = res[f"test_score"].std()
+            # Format the duration
+            self._logger.info(f"Finished cross-validation for {data_key} with {estimator_key}."
+                              f" Mean = {res_mean}, SD = {res_std}, Duration: {duration}")
+
+        # Convert the results to a CrossValidationResult instance and return it
+        return data_key, estimator_key, CrossValidationResult(
+            test_scores=res['test_score'],
+            train_scores=res['train_score'],
+            fit_times=res['fit_time'],
+            score_times=res['score_time'],
+            estimator=res['estimator'],
+            metrics=res['metrics'],
+            metrics_group=res['metrics_group']
+        )
 
     @abstractmethod
     def get_cv_scores(self):

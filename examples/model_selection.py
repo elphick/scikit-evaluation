@@ -1,5 +1,4 @@
 """
-===============
 Model Selection
 ===============
 
@@ -24,7 +23,7 @@ from sklearn.preprocessing import StandardScaler
 from elphick.sklearn_viz.model_selection import ModelSelection, plot_model_selection, metrics
 from elphick.sklearn_viz.model_selection.models import Models
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(module)s - %(funcName)s: %(message)s',
                     datefmt='%Y-%m-%dT%H:%M:%S%z')
 
@@ -74,7 +73,7 @@ fig
 # like a scorer, they are not coloured.
 
 ms: ModelSelection = ModelSelection(estimators=models_to_test, datasets=xy, target='class', pre_processor=pp,
-                                    k_folds=30)
+                                    k_folds=30, verbosity=0)
 fig = ms.plot(title='Model Selection', metrics='f1')
 fig.update_layout(height=600)
 # noinspection PyTypeChecker
@@ -107,7 +106,7 @@ models_to_test: Dict = Models().fast_regressors()
 ms: ModelSelection = ModelSelection(estimators=models_to_test, datasets=xy, target='progression', pre_processor=pp,
                                     k_folds=30, scorer='r2', group=group,
                                     metrics={'moe': metrics.moe_95, 'me': metrics.mean_error},
-                                    n_jobs=-2)
+                                    n_jobs=-2, verbosity=2)
 # %%
 # Next we'll view the plot, but we will not (yet) leverage the group variable.
 

@@ -1,3 +1,12 @@
+Sklearn_Viz 0.6.3 (2024-05-11)
+==============================
+
+Features
+--------
+
+- ModelSelection - added verbosity for more granular logging. Updated the gallery example. (#47)
+
+
 Sklearn_Viz 0.6.2 (2024-05-11)
 ==============================
 
