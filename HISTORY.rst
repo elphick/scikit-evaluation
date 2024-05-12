@@ -1,3 +1,12 @@
+Sklearn_Viz 0.6.5 (2024-05-12)
+==============================
+
+Features
+--------
+
+- Improvements to the LearningCurve.  Added dataclass for improved data management. Refactored plot method to support plotting of goodness of fit (gof) metrics other than the scorer. (#37)
+
+
 Sklearn_Viz 0.6.6 (2024-05-12)
 ==============================
 
