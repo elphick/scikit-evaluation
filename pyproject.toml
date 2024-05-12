@@ -11,7 +11,7 @@ name = "PyPI"
 priority = "primary"
 
 [tool.poetry.scripts]
-bump_version = "scripts.bump_version:main"
+bump-version = "scripts.bump_version:main"
 
 [tool.towncrier]
 package = "elphick.sklearn_viz"
