@@ -62,7 +62,7 @@ plotly.io.show(fig)
 # Plotting using the object allows access to the underlying data.
 #
 # .. tip::
-#    You can use n_jobs to parallelize the computation.
+#    You can use `n_jobs` to parallelize the computation.
 
 lc: LearningCurve = LearningCurve(pipe, x=X, y=y, cv=5, n_jobs=5)
 fig = lc.plot(title='Learning Curve').update_layout(height=600)
@@ -106,7 +106,7 @@ fig
 
 lc: LearningCurve = LearningCurve(pipe, x=X, y=y,
                                   metrics={'mse': metrics.mean_squared_error, 'moe': metrics.moe_95},
-                                  cv=5)
+                                  cv=5, n_jobs=5)
 fig = lc.plot(title='Learning Curve with Metrics', metrics=['mse', 'moe'], col_wrap=2).update_layout(height=800)
 fig
 
