@@ -106,7 +106,7 @@ fig
 
 lc: LearningCurve = LearningCurve(pipe, x=X, y=y,
                                   metrics={'mse': metrics.mean_squared_error, 'moe': metrics.moe_95},
-                                  cv=5)
+                                  cv=5, n_jobs=5)
 fig = lc.plot(title='Learning Curve with Metrics', metrics=['mse', 'moe'], col_wrap=2).update_layout(height=800)
 fig
 

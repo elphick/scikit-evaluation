@@ -9,6 +9,7 @@ import matplotlib
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from joblib import Parallel, delayed
 from plotly.subplots import make_subplots
 from sklearn.base import is_classifier, is_regressor
 from sklearn.model_selection import learning_curve, train_test_split, StratifiedKFold, KFold
@@ -183,8 +184,7 @@ class LearningCurve:
         else:
             cv = KFold(n_splits=self.cv)
 
-        for train_size in self.train_sizes:
-
+        def process_train_size(train_size):
             train_scores_fold: list = []
             val_scores_fold: list = []
             metrics_fold: dict = {metric: {'training': [], 'validation': []} for metric in self.metrics.keys()}
@@ -213,16 +213,22 @@ class LearningCurve:
                 val_scores_fold.append(self.estimator.score(X_val, y_val))
 
                 if self.metrics is not None:
-                    for metric_name, metric_func in self.metrics.items():
+                    for metric_name_, metric_func in self.metrics.items():
                         train_metric = metric_func(y_train, self.estimator.predict(X_train))
                         val_metric = metric_func(y_val, self.estimator.predict(X_val))
 
-                        metrics_fold[metric_name]['training'].append(train_metric)
-                        metrics_fold[metric_name]['validation'].append(val_metric)
+                        metrics_fold[metric_name_]['training'].append(train_metric)
+                        metrics_fold[metric_name_]['validation'].append(val_metric)
 
-            # Average the results over the folds
+            return train_scores_fold, val_scores_fold, metrics_fold, train_size_abs
+
+        results = Parallel(n_jobs=self.n_jobs)(
+            delayed(process_train_size)(train_size) for train_size in self.train_sizes)
+
+        for train_scores_fold, val_scores_fold, metrics_fold, train_size_abs_fold in results:
             train_scores.append(train_scores_fold)
             val_scores.append(val_scores_fold)
+            train_size_abs.append(train_size_abs_fold)
             for metric_name in metrics.keys():
                 metrics[metric_name]['training'].append(metrics_fold[metric_name]['training'])
                 metrics[metric_name]['validation'].append(metrics_fold[metric_name]['validation'])
@@ -232,10 +238,8 @@ class LearningCurve:
             metrics[metric_name]['training'] = np.array(metrics[metric_name]['training'])
             metrics[metric_name]['validation'] = np.array(metrics[metric_name]['validation'])
 
-        results = LearningCurveResult(training_scores=np.array(train_scores), validation_scores=np.array(val_scores),
-                                      training_sizes=np.array(train_size_abs), metrics=metrics)
-
-        return results
+        return LearningCurveResult(training_scores=np.array(train_scores), validation_scores=np.array(val_scores),
+                                   training_sizes=np.array(train_size_abs).ravel(), metrics=metrics)
 
     def plot(self,
              title: Optional[str] = None,
