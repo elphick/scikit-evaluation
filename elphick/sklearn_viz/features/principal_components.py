@@ -144,7 +144,7 @@ class PrincipalComponents:
     def data(self) -> Optional[Dict]:
         def get_pca_results(pipe, x):
             xt: pd.DataFrame = pipe.fit_transform(x)
-            xt.columns = [f"PC{i + 1}" for i in range(len(x.columns))]
+            xt.columns = [f"PC{i + 1}" for i in range(len(xt.columns))]
             var: pd.Series = pd.Series(data=pipe['pca'].explained_variance_ratio_ * 100., name='explained_variance')
             loadings = pd.DataFrame(data=pipe['pca'].components_.T * np.sqrt(pipe['pca'].explained_variance_),
                                     index=x.columns, columns=xt.columns)
