@@ -2,6 +2,7 @@ from functools import partial
 from typing import Literal
 
 import numpy as np
+import sklearn
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, f1_score
 
 
@@ -9,15 +10,24 @@ def mean_error(y_true, y_est) -> float:
     return float(np.mean(y_est - y_true))
 
 
+def rmse(y_true, y_est):
+    if sklearn.__version__ >= '1.4':
+        from sklearn.metrics import root_mean_squared_error
+        return root_mean_squared_error(y_true, y_est)
+    else:
+        mse = mean_squared_error(y_true, y_est)
+        return np.sqrt(mse)
+
+
 def moe_95(y_true, y_est, metric: Literal["moe", "lo", "hi"] = 'moe') -> float:
     me = mean_error(y_true, y_est)
-    rmse = mean_squared_error(y_true, y_est, squared=False)
+    rmse_value = rmse(y_true, y_est)
     if metric == 'lo':
-        res = me - (rmse * 1.96)
+        res = me - (rmse_value * 1.96)
     elif metric == 'hi':
-        res = me + (rmse * 1.96)
+        res = me + (rmse_value * 1.96)
     elif metric == 'moe':
-        res = np.mean([(np.abs(me - (rmse * 1.96))), (me + (rmse * 1.96))])
+        res = np.mean([(np.abs(me - (rmse_value * 1.96))), (me + (rmse_value * 1.96))])
     else:
         raise KeyError(f'Invalid metric supplied.  Allowed values are: {Literal["moe", "lo", "hi"]}')
     return res
@@ -42,7 +52,7 @@ regression_metrics = {
     'r2': r2,
     'mae': mean_absolute_error,
     'mse': mean_squared_error,
-    'rmse': partial(mean_squared_error, squared=False),
+    'rmse': rmse,
     'moe': partial(moe_95, metric='moe'),
     'moe_lo': partial(moe_95, metric='lo'),
     'moe_hi': partial(moe_95, metric='hi')}

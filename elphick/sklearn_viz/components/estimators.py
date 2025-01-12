@@ -2,7 +2,7 @@ from abc import ABC
 
 import numpy as np
 import pandas as pd
-from sklearn.base import RegressorMixin, BaseEstimator, ClassifierMixin
+from sklearn.base import RegressorMixin, BaseEstimator, ClassifierMixin, clone
 from sklearn.exceptions import NotFittedError
 from sklearn.utils._estimator_html_repr import _VisualBlock
 from sklearn.utils.validation import check_is_fitted
@@ -14,11 +14,11 @@ class PartitionEstimatorBase(BaseEstimator, ABC):
     def __init__(self, estimator, *, partition_defs: dict[str, str], n_jobs=None, verbose=False):
         super().__init__()
 
-        self.n_jobs = n_jobs
-        self.verbose = verbose
-        self.estimator = estimator
+        self.n_jobs: int = n_jobs
+        self.verbose: bool = verbose
+        self.estimator: BaseEstimator = estimator
 
-        self.estimators: list[tuple] = [(k, estimator) for k in partition_defs.keys()]
+        self.estimators: list[tuple[str, object]] = [(k, clone(estimator)) for k in partition_defs.keys()]
         self.partition_defs = partition_defs
 
         # set post fitting
