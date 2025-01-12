@@ -4,7 +4,7 @@ Sklearn_Viz 0.6.8 (2025-01-12)
 Bugfixes
 --------
 
-- PartitionModel overwrite bug fixed.  rmse metric fix for sklearn >=1.4. (#56)
+- PartitionModel overwite bug fixed.  rmse metric fix for sklearn >=1.4. (#56)
 
 
 Sklearn_Viz 0.6.5 (2024-05-12)
@@ -25,7 +25,7 @@ Features
 - Parallel processing for the LearningCurve when using metrics. (#37)
 
 
-Sklearn_Viz 0.6.7 (2024-05-12)
+Sklearn_Viz 0.6.5 (2024-05-12)
 ==============================
 
 Features
