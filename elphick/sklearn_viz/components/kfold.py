@@ -4,7 +4,7 @@ from sklearn.model_selection import StratifiedKFold
 class FeatureStratifiedKFold:
     """Strategy to split data into folds based on a feature column.
 
-    The standard StratifiedKFold class from scikit-learn supports stratification based on a feature column.
+    The standard StratifiedKFold class from scikit-learn supports stratification based on a target column.
     """
 
     def __init__(self, n_splits=5, shuffle=True, random_state=42):
