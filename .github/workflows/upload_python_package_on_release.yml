@@ -40,10 +40,24 @@ jobs:
           fi
         shell: bash
 
+      - name: Check if version is published on PyPI
+        id: pypi_check
+        run: |
+          VERSION=$(grep -oP '(?<=version = ")[^"]*' pyproject.toml)
+          PACKAGE_NAME=$(grep -oP '(?<=name = ")[^"]*' pyproject.toml)
+          if curl -s https://pypi.org/pypi/$PACKAGE_NAME/$VERSION/json | grep -q "Not Found"; then
+            echo "version_published=false" >> $GITHUB_ENV
+            echo "::set-output name=version_published::false"
+          else
+            echo "version_published=true" >> $GITHUB_ENV
+            echo "::set-output name=version_published::true"
+          fi
+        shell: bash
+
 
   deploy:
     needs: check_version
-    if: needs.check_version.outputs.version_changed == 'true'
+    if: needs.check_version.outputs.version_changed == 'true' || needs.check_version.outputs.version_published == 'false'
     runs-on: ubuntu-latest
 
     steps:
