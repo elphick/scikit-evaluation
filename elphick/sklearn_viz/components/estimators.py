@@ -93,6 +93,7 @@ class PartitionEstimatorBase(BaseEstimator, ABC):
         return _VisualBlock("parallel", estimators, names=names, name_details=criteria)
 
 
+
 class PartitionRegressor(PartitionEstimatorBase, RegressorMixin):
     """Prediction for partitioned subsets of records (estimation domains) defined by filter criteria.
 
@@ -105,6 +106,7 @@ class PartitionRegressor(PartitionEstimatorBase, RegressorMixin):
         super().__init__(estimator, partition_defs=partition_defs, n_jobs=n_jobs, verbose=verbose)
         # set scorer for regression
         self.scorer_ = 'r2'
+        self._estimator_type = 'regressor'
 
     def fit(self, X: pd.DataFrame, y: Optional[pd.DataFrame] = None) -> 'PartitionRegressor':
         super().fit(X, y)
@@ -112,6 +114,14 @@ class PartitionRegressor(PartitionEstimatorBase, RegressorMixin):
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         return super().predict(X)
+
+    # def _more_tags(self):
+    #     return {'estimator_type': 'regressor'}
+
+    # def __sklearn_tags__(self):
+    #     tags = super().__sklearn_tags__()
+    #     tags['estimator_type'] = 'regressor'
+    #     return tags
 
 
 class PartitionClassifier(PartitionEstimatorBase, ClassifierMixin):
@@ -126,6 +136,7 @@ class PartitionClassifier(PartitionEstimatorBase, ClassifierMixin):
         super().__init__(estimator, partition_defs=partition_defs, n_jobs=n_jobs, verbose=verbose)
         # set scorer for regression
         self.scorer_ = 'accuracy'
+        self._estimator_type = 'classifier'
 
     def fit(self, X: pd.DataFrame, y: Optional[pd.DataFrame] = None) -> 'PartitionClassifier':
         super().fit(X, y)
@@ -133,3 +144,11 @@ class PartitionClassifier(PartitionEstimatorBase, ClassifierMixin):
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         return super().predict(X)
+
+    # def _more_tags(self):
+    #     return {'estimator_type': 'classifier'}
+
+    # def __sklearn_tags__(self):
+    #     tags = super().__sklearn_tags__()
+    #     tags['estimator_type'] = 'classifier'
+    #     return tags

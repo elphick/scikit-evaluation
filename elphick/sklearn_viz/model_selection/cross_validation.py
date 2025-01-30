@@ -58,7 +58,9 @@ class CrossValidatorBase(ABC):
         self.is_regressor = all(is_regressor(estimator) for estimator in estimators.values())
 
         if not self.is_classifier and not self.is_regressor:
-            raise ValueError("All estimators must be either classifiers or regressors.")
+            self._logger.warning("All estimators must be either classifiers or regressors. "
+                                 "See issue #61.  Changed to warning instead of error until resolved")
+            # raise ValueError("All estimators must be either classifiers or regressors.")
 
         if scorer is None:
             scorer = 'accuracy' if self.is_classifier else 'r2'
