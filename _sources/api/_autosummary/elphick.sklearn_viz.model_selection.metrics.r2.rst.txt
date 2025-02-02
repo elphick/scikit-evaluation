@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.model\_selection.metrics.r2
+================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.metrics
+
+.. autofunction:: r2

@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.model\_selection.model\_selection.subplot\_index
+=====================================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.model_selection
+
+.. autofunction:: subplot_index

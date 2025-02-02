@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elphick.sklearn_viz.model_selection.cross_validation &mdash; sklearn-viz  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            sklearn-viz
+          </a>
+              <div class="version">
+                0.6.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../auto_examples/index.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license/license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">sklearn-viz</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">elphick.sklearn_viz.model_selection.cross_validation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for elphick.sklearn_viz.model_selection.cross_validation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">is_classifier</span><span class="p">,</span> <span class="n">is_regressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">KFold</span><span class="p">,</span> <span class="n">cross_validate</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">elphick.sklearn_viz.model_selection.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">classification_metrics</span><span class="p">,</span> <span class="n">regression_metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">elphick.sklearn_viz.model_selection.scorers</span><span class="w"> </span><span class="kn">import</span> <span class="n">classification_scorers</span><span class="p">,</span> <span class="n">regression_scorers</span>
+
+
+<div class="viewcode-block" id="CrossValidationResult"><a class="viewcode-back" href="../../../../api/_autosummary/elphick.sklearn_viz.model_selection.cross_validation.CrossValidationResult.html#elphick.sklearn_viz.model_selection.cross_validation.CrossValidationResult">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CrossValidationResult</span><span class="p">:</span>
+    <span class="n">test_scores</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="n">train_scores</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="n">fit_times</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="n">score_times</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="n">estimator</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
+    <span class="n">metrics_group</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span></div>
+
+
+<div class="viewcode-block" id="CrossValidatorBase"><a class="viewcode-back" href="../../../../api/_autosummary/elphick.sklearn_viz.model_selection.cross_validation.CrossValidatorBase.html#elphick.sklearn_viz.model_selection.cross_validation.CrossValidatorBase">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CrossValidatorBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="CrossValidatorBase.__init__"><a class="viewcode-back" href="../../../../api/_autosummary/elphick.sklearn_viz.model_selection.cross_validation.CrossValidatorBase.html#elphick.sklearn_viz.model_selection.cross_validation.CrossValidatorBase.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">estimators</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseEstimator</span><span class="p">]],</span>
+                 <span class="n">datasets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]],</span>
+                 <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">pre_processor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+                 <span class="n">cv</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+                 <span class="n">scorer</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+                 <span class="n">metrics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+                 <span class="n">group</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+                 <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">n_jobs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">verbosity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="c1"># If algorithms is not a dictionary, convert it into a dictionary with a default key</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimators</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">estimators</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;estimator&#39;</span><span class="p">:</span> <span class="n">estimators</span><span class="p">}</span>
+
+        <span class="c1"># If datasets is not a dictionary, convert it into a dictionary with a default key</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datasets</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">datasets</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;dataset&#39;</span><span class="p">:</span> <span class="n">datasets</span><span class="p">}</span>
+
+        <span class="c1"># Check if all estimators are classifiers or regressors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_classifier</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span> <span class="k">for</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="n">estimators</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_regressor</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_regressor</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span> <span class="k">for</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="n">estimators</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_regressor</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All estimators must be either classifiers or regressors.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scorer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scorer</span> <span class="o">=</span> <span class="s1">&#39;accuracy&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span> <span class="k">else</span> <span class="s1">&#39;r2&#39;</span>
+
+        <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">default_metrics</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;classification&#39;</span><span class="p">:</span> <span class="n">classification_metrics</span><span class="p">,</span>
+                <span class="s1">&#39;regression&#39;</span><span class="p">:</span> <span class="n">regression_metrics</span>
+            <span class="p">}</span>
+            <span class="n">metrics_type</span> <span class="o">=</span> <span class="s1">&#39;classification&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classifier</span> <span class="k">else</span> <span class="s1">&#39;regression&#39;</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="n">default_metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metrics_type</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseEstimator</span><span class="p">]</span> <span class="o">=</span> <span class="n">estimators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="n">datasets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pre_processor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">pre_processor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scorer</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">scorer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">n_jobs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">verbosity</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CrossValidationResult</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">features_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]]</span> <span class="k">if</span>
+                                       <span class="n">col</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_algorithms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_datasets</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_cores</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">n_cores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">n_cores</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span>
+        <span class="k">return</span> <span class="n">n_cores</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">results</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CrossValidationResult</span><span class="p">]]]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>  <span class="c1"># Record the start time</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Commencing cross validation...&quot;</span><span class="p">)</span>
+
+            <span class="n">d_results</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">data_key</span><span class="p">:</span> <span class="p">{</span><span class="n">algo_key</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">algo_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span> <span class="k">for</span> <span class="n">data_key</span> <span class="ow">in</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+
+            <span class="c1"># Run the tasks in a loop</span>
+            <span class="k">for</span> <span class="n">data_key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">estimator_key</span><span class="p">,</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">data_key</span><span class="p">,</span> <span class="n">estimator_key</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cross_validate_task</span><span class="p">(</span><span class="n">data_key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">estimator_key</span><span class="p">,</span> <span class="n">estimator</span><span class="p">)</span>
+                    <span class="n">d_results</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="n">estimator_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="n">d_results</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">duration</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">round</span><span class="p">((</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cross validation complete in </span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2"> using </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_cores</span><span class="si">}</span><span class="s2"> &quot;</span>
+                                  <span class="sa">f</span><span class="s2">&quot;worker</span><span class="si">{</span><span class="s1">&#39;s&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">n_cores</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cross_validate_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_key</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">estimator_key</span><span class="p">,</span> <span class="n">estimator</span><span class="p">):</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>  <span class="c1"># Record the start time</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting cross-validation for </span><span class="si">{</span><span class="n">data_key</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">estimator_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Ensure that only the features present in the dataset are used</span>
+        <span class="n">features_in_dataset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features_in</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)))</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">features_in_dataset</span><span class="p">]</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_processor</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_processor</span><span class="o">.</span><span class="n">set_output</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="s2">&quot;pandas&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scorer</span><span class="p">,</span> <span class="n">return_train_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">return_estimator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_indices</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_score</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                             <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">],</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;metrics_group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_metrics</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                                                                          <span class="n">estimators</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;estimator&#39;</span><span class="p">],</span>
+                                                                          <span class="n">indices</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">],</span>
+                                                                          <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">round</span><span class="p">((</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())))</span>
+            <span class="n">res_mean</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;test_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">res_std</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;test_score&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+            <span class="c1"># Format the duration</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finished cross-validation for </span><span class="si">{</span><span class="n">data_key</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">estimator_key</span><span class="si">}</span><span class="s2">.&quot;</span>
+                              <span class="sa">f</span><span class="s2">&quot; Mean = </span><span class="si">{</span><span class="n">res_mean</span><span class="si">}</span><span class="s2">, SD = </span><span class="si">{</span><span class="n">res_std</span><span class="si">}</span><span class="s2">, Duration: </span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Convert the results to a CrossValidationResult instance and return it</span>
+        <span class="k">return</span> <span class="n">data_key</span><span class="p">,</span> <span class="n">estimator_key</span><span class="p">,</span> <span class="n">CrossValidationResult</span><span class="p">(</span>
+            <span class="n">test_scores</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;test_score&#39;</span><span class="p">],</span>
+            <span class="n">train_scores</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;train_score&#39;</span><span class="p">],</span>
+            <span class="n">fit_times</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;fit_time&#39;</span><span class="p">],</span>
+            <span class="n">score_times</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;score_time&#39;</span><span class="p">],</span>
+            <span class="n">estimator</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;estimator&#39;</span><span class="p">],</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">],</span>
+            <span class="n">metrics_group</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;metrics_group&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cv_scores</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">chunks</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">data_key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">estimator_key</span><span class="p">,</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="n">estimator_key</span><span class="p">]</span><span class="o">.</span><span class="n">test_scores</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="n">data_key</span><span class="p">,</span> <span class="n">estimator_key</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cv_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">by_group</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">chunks</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">metric_key</span> <span class="o">=</span> <span class="s2">&quot;metrics_group&quot;</span> <span class="k">if</span> <span class="n">by_group</span> <span class="k">else</span> <span class="s2">&quot;metrics&quot;</span>
+        <span class="k">for</span> <span class="n">data_key</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">estimator_key</span><span class="p">,</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+                    <span class="c1"># Access the metrics or metrics_group property of the CrossValidationResult instance</span>
+                    <span class="n">metric_data</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">data_key</span><span class="p">][</span><span class="n">estimator_key</span><span class="p">],</span> <span class="n">metric_key</span><span class="p">)[</span><span class="n">metric</span><span class="p">]</span>
+                    <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span>
+                        <span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="n">data_key</span><span class="o">=</span><span class="n">data_key</span><span class="p">,</span> <span class="n">algo_key</span><span class="o">=</span><span class="n">estimator_key</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">)))</span>
+        <span class="n">res</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;data_key&#39;</span><span class="p">,</span> <span class="s1">&#39;algo_key&#39;</span><span class="p">],</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">})</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;fold&#39;</span><span class="p">,</span> <span class="s1">&#39;data_key&#39;</span><span class="p">,</span> <span class="s1">&#39;algo_key&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">estimators</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="n">metric_results</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">metric_results_group</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">fn_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">metric_values</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">metric_groups</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">test_indexes</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">estimators</span><span class="p">,</span> <span class="n">indices</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">]):</span>
+                <span class="n">y_true</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">test_indexes</span><span class="p">]]</span>
+                <span class="n">y_est</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">test_indexes</span><span class="p">],</span> <span class="p">:])</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y_est</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">and</span> <span class="n">y_est</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">y_est</span> <span class="o">=</span> <span class="n">y_est</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">metric_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn_metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># calculate the metric by each group in the group series.</span>
+                    <span class="n">y_est</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y_est</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;y_est&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">test_indexes</span><span class="p">]),</span>
+                                     <span class="n">right</span><span class="o">=</span><span class="n">group</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">y_est_grouped</span> <span class="o">=</span> <span class="n">y_est</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">group</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">grouped_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">y_est_grouped</span><span class="o">.</span><span class="n">get_group</span><span class="p">((</span><span class="n">x</span><span class="p">,))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y_est_grouped</span><span class="o">.</span><span class="n">groups</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">grp_res</span> <span class="ow">in</span> <span class="n">grouped_results</span><span class="p">:</span>
+                        <span class="n">group_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">grp_res</span><span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">group_metric_results</span> <span class="o">=</span> <span class="n">fn_metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">[</span><span class="n">grp_res</span><span class="o">.</span><span class="n">index</span><span class="p">],</span> <span class="n">grp_res</span><span class="p">[</span><span class="s1">&#39;y_est&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">group_value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metric_groups</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                            <span class="n">metric_groups</span><span class="p">[</span><span class="n">group_value</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">group_metric_results</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">metric_groups</span><span class="p">[</span><span class="n">group_value</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">group_metric_results</span><span class="p">)</span>
+            <span class="n">metric_results</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_values</span>
+            <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">metric_results_group</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_groups</span>
+
+        <span class="k">return</span> <span class="n">metric_results</span><span class="p">,</span> <span class="n">metric_results_group</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_by_group_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+        <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">by_group_score_chunks</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">by_group_metric_chunks</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">grp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="n">grp_index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">==</span> <span class="n">grp</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+            <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="n">dataset</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">features_in</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">grp_index</span><span class="p">]</span>
+            <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="n">dataset</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">grp_index</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_processor</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_processor</span><span class="o">.</span><span class="n">set_output</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="s2">&quot;pandas&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">res</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="p">[</span><span class="n">estimator</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scorer</span><span class="p">,</span> <span class="n">return_estimator</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                 <span class="n">return_indices</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)</span>
+            <span class="n">by_group_score_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;test_score&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">grp</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">res</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_metrics</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                                                           <span class="n">estimators</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;estimator&#39;</span><span class="p">],</span>
+                                                           <span class="n">indices</span><span class="o">=</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">],</span>
+                                                           <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">grp</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span>
+            <span class="n">by_group_metric_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="n">grp</span><span class="p">)</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">(</span><span class="s1">&#39;fold&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>
+        <span class="n">by_group_metrics</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">by_group_metric_chunks</span><span class="p">)</span>
+        <span class="n">by_group_scores</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">by_group_score_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">by_group_metrics</span><span class="p">,</span> <span class="n">by_group_scores</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">show_group</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">col_wrap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Greg Elphick.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

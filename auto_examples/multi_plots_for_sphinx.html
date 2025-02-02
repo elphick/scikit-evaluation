@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Plots for Sphinx &mdash; sklearn-viz  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Principal Component Analysis" href="principal_components.html" />
+    <link rel="prev" title="Plot Residuals" href="plot_residuals.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            sklearn-viz
+          </a>
+              <div class="version">
+                0.6.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Example Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="parallel_coordinates.html">Parallel Coordinates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_residuals.html">Plot Residuals</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Multi-Plots for Sphinx</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#create-some-data-and-figures">Create some data and figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multiple-instances">Multiple Instances</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="principal_components.html">Principal Component Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compare_datasets.html">Compare Multiple N-D datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="learning_curve.html">Learning Curve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot_forest_importances.html">Feature importances with a forest of trees</a></li>
+<li class="toctree-l2"><a class="reference internal" href="outlier_detection.html">Multivariate Outlier Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="category_feature_analysis.html">Category Feature Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_selection.html">Model Selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="partition_regressor.html">Partition Estimator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license/license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sklearn-viz</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Example Gallery</a></li>
+      <li class="breadcrumb-item active">Multi-Plots for Sphinx</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/multi_plots_for_sphinx.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-multi-plots-for-sphinx-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="multi-plots-for-sphinx">
+<span id="sphx-glr-auto-examples-multi-plots-for-sphinx-py"></span><h1>Multi-Plots for Sphinx<a class="headerlink" href="#multi-plots-for-sphinx" title="Permalink to this heading"></a></h1>
+<p>Using plotly in Sphinx is great to deliver interactivity in you documentation.
+However, if you’re using Sphinx to document your datascience project you’ll likely come across the challenge of
+wanting to execute plots within a loop. This snippet shows how to use the MultiPlot class to save multiple plots and
+present them like subplots in your documentation.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># this next line provides the thumbnail, but you must have set save_as_png=True in the MultiPlot object.</span>
+<span class="c1"># sphinx_gallery_thumbnail_path = &#39;_static/multi_plots_for_sphinx/figures.tagged.0.png&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">elphick.sklearn_viz.utils.file</span><span class="w"> </span><span class="kn">import</span> <span class="n">script_path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">elphick.sklearn_viz.utils.plotly</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiPlot</span>
+</pre></div>
+</div>
+<section id="create-some-data-and-figures">
+<h2>Create some data and figures<a class="headerlink" href="#create-some-data-and-figures" title="Permalink to this heading"></a></h2>
+<p>We use a loop to generate the figures but instead of displaying them inside the loop,
+we add them to a list.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ys</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="p">]</span>
+
+<span class="c1"># Define the directory where the .rst and .html files will be created</span>
+<span class="n">static_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">script_path</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="s1">&#39;docs&#39;</span> <span class="o">/</span> <span class="s1">&#39;source&#39;</span> <span class="o">/</span> <span class="s1">&#39;_static&#39;</span>
+
+<span class="n">figs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ys</span><span class="p">):</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">y</span><span class="p">])</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)],</span> <span class="n">layout_title_text</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">figs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Save the figures to the _static directory of the docs using MultiPlot</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MultiPlot</span><span class="p">(</span><span class="n">docs_static_dir</span><span class="o">=</span><span class="n">static_dir</span><span class="p">)</span><span class="o">.</span><span class="n">save_plots</span><span class="p">(</span><span class="n">figs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This rst directive will include the figures in the documentation. Note how a subdirectory is created in the
+static folder using the stem of the script filename:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">include</span><span class="p">::</span> <span class="o">../</span><span class="n">_static</span><span class="o">/</span><span class="n">multi_plots_for_sphinx</span><span class="o">/</span><span class="n">figures</span><span class="o">.</span><span class="n">rst</span>
+</pre></div>
+</div>
+<table style='width: 100%;'>
+    <tr>
+        <td><iframe src='../_static/multi_plots_for_sphinx/figures.0.html' width='100%' height='600px' style='border:1px solid lightgray;'></iframe></td>
+    </tr>
+    <tr>
+        <td><iframe src='../_static/multi_plots_for_sphinx/figures.1.html' width='100%' height='600px' style='border:1px solid lightgray;'></iframe></td>
+    </tr>
+    <tr>
+        <td><iframe src='../_static/multi_plots_for_sphinx/figures.2.html' width='100%' height='600px' style='border:1px solid lightgray;'></iframe></td>
+    </tr>
+    <tr>
+        <td><iframe src='../_static/multi_plots_for_sphinx/figures.3.html' width='100%' height='600px' style='border:1px solid lightgray;'></iframe></td>
+    </tr>
+</table></section>
+<section id="multiple-instances">
+<h2>Multiple Instances<a class="headerlink" href="#multiple-instances" title="Permalink to this heading"></a></h2>
+<p>If you need to use the MultiPlot class in multiple instances, you can use the tag parameter to ensure
+the saved files are unique. This is useful when you want to save multiple sets of plots in the same script.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MultiPlot</span><span class="p">(</span><span class="n">docs_static_dir</span><span class="o">=</span><span class="n">static_dir</span><span class="p">,</span> <span class="n">super_title</span><span class="o">=</span><span class="s2">&quot;Second Instance using a tag&quot;</span><span class="p">,</span>
+          <span class="n">col_wrap</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">save_as_png</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s2">&quot;tagged&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save_plots</span><span class="p">(</span><span class="n">figs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here is how you include the images when using the tag parameter:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">include</span><span class="p">::</span> <span class="o">../</span><span class="n">_static</span><span class="o">/</span><span class="n">multi_plots_for_sphinx</span><span class="o">/</span><span class="n">figures</span><span class="o">.</span><span class="n">tagged</span><span class="o">.</span><span class="n">rst</span>
+</pre></div>
+</div>
+<h1>Second Instance using a tag</h1><table style='width: 100%;'>
+    <tr>
+        <td><iframe src='../_static/multi_plots_for_sphinx/figures.tagged.0.html' width='100%' height='600px' style='border:1px solid lightgray;'></iframe></td>
+        <td><iframe src='../_static/multi_plots_for_sphinx/figures.tagged.1.html' width='100%' height='600px' style='border:1px solid lightgray;'></iframe></td>
+    </tr>
+    <tr>
+        <td><iframe src='../_static/multi_plots_for_sphinx/figures.tagged.2.html' width='100%' height='600px' style='border:1px solid lightgray;'></iframe></td>
+        <td><iframe src='../_static/multi_plots_for_sphinx/figures.tagged.3.html' width='100%' height='600px' style='border:1px solid lightgray;'></iframe></td>
+    </tr>
+</table><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.380 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-multi-plots-for-sphinx-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/4a894e6d73bba103a9e9427a5a1f0ffc/multi_plots_for_sphinx.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">multi_plots_for_sphinx.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/f3bfe296ea4fdf3434575b614cd82544/multi_plots_for_sphinx.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">multi_plots_for_sphinx.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_residuals.html" class="btn btn-neutral float-left" title="Plot Residuals" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="principal_components.html" class="btn btn-neutral float-right" title="Principal Component Analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Greg Elphick.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

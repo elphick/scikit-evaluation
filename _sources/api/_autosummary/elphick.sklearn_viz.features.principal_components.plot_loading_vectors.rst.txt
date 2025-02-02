@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.features.principal\_components.plot\_loading\_vectors
+==========================================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.principal_components
+
+.. autofunction:: plot_loading_vectors

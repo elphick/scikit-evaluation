@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.features.importance.plot\_feature\_importance
+==================================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.importance
+
+.. autofunction:: plot_feature_importance

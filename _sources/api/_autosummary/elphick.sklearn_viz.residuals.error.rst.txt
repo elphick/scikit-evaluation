@@ -1,0 +1,30 @@
+elphick.sklearn\_viz.residuals.error
+====================================
+
+.. automodule:: elphick.sklearn_viz.residuals.error
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Errors
+   
+   
+
+   
+   
+   
+
+
+

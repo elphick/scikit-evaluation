@@ -1,0 +1,43 @@
+elphick.sklearn\_viz.features.principal\_components
+===================================================
+
+.. automodule:: elphick.sklearn_viz.features.principal_components
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+   
+      plot_correlation_circle
+      plot_explained_variance
+      plot_loading_vectors
+      plot_principal_components
+      plot_scatter_matrix
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      PCResults
+      PrincipalComponents
+   
+   
+
+   
+   
+   
+
+
+

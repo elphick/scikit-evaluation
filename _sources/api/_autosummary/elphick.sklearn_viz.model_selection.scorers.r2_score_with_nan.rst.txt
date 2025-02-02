@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.model\_selection.scorers.r2\_score\_with\_nan
+==================================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.scorers
+
+.. autofunction:: r2_score_with_nan

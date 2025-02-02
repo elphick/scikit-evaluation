@@ -1,0 +1,35 @@
+elphick.sklearn\_viz.model\_selection.learning\_curve.LearningCurve
+===================================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.learning_curve
+
+.. autoclass:: LearningCurve
+   :members:
+   :special-members: __add__, __mul__
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LearningCurve.__init__
+      ~LearningCurve.calculate_grid_and_subplot_order
+      ~LearningCurve.calculate_learning_curve
+      ~LearningCurve.custom_learning_curve
+      ~LearningCurve.plot
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LearningCurve.n_cores
+      ~LearningCurve.results
+   
+   

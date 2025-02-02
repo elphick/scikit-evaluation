@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.features.scatter\_matrix.plot\_scatter\_matrix
+===================================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.scatter_matrix
+
+.. autofunction:: plot_scatter_matrix

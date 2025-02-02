@@ -1,0 +1,39 @@
+elphick.sklearn\_viz.model\_selection.learning\_curve
+=====================================================
+
+.. automodule:: elphick.sklearn_viz.model_selection.learning_curve
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+   
+      plot_learning_curve
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      LearningCurve
+      LearningCurveResult
+   
+   
+
+   
+   
+   
+
+
+

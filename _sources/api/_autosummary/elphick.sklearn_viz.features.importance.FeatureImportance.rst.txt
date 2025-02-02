@@ -1,0 +1,31 @@
+elphick.sklearn\_viz.features.importance.FeatureImportance
+==========================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.importance
+
+.. autoclass:: FeatureImportance
+   :members:
+   :special-members: __add__, __mul__
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~FeatureImportance.__init__
+      ~FeatureImportance.plot
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FeatureImportance.data
+   
+   

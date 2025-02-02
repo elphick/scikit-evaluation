@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.model\_selection.metrics.mean\_error
+=========================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.metrics
+
+.. autofunction:: mean_error

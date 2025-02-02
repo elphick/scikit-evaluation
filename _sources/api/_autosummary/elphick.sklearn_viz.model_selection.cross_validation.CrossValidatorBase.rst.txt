@@ -1,0 +1,37 @@
+elphick.sklearn\_viz.model\_selection.cross\_validation.CrossValidatorBase
+==========================================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.cross_validation
+
+.. autoclass:: CrossValidatorBase
+   :members:
+   :special-members: __add__, __mul__
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CrossValidatorBase.__init__
+      ~CrossValidatorBase.calculate_metrics
+      ~CrossValidatorBase.cross_validate_task
+      ~CrossValidatorBase.get_cv_metrics
+      ~CrossValidatorBase.get_cv_scores
+      ~CrossValidatorBase.get_model_by_group_data
+      ~CrossValidatorBase.plot
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CrossValidatorBase.n_cores
+      ~CrossValidatorBase.results
+   
+   

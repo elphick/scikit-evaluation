@@ -1,0 +1,31 @@
+elphick.sklearn\_viz.features.parallel\_coordinates
+===================================================
+
+.. automodule:: elphick.sklearn_viz.features.parallel_coordinates
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+   
+      plot_parallel_coordinates
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

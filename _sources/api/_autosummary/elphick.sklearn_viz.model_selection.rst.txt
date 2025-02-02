@@ -1,0 +1,36 @@
+﻿elphick.sklearn\_viz.model\_selection
+=====================================
+
+.. automodule:: elphick.sklearn_viz.model_selection
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   elphick.sklearn_viz.model_selection.cross_validation
+   elphick.sklearn_viz.model_selection.learning_curve
+   elphick.sklearn_viz.model_selection.metrics
+   elphick.sklearn_viz.model_selection.model_selection
+   elphick.sklearn_viz.model_selection.models
+   elphick.sklearn_viz.model_selection.scorers
+

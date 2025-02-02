@@ -1,0 +1,239 @@
+:orphan:
+
+Example Gallery
+===============
+
+This gallery provides some examples.
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Parallel coordinate plots are very useful for Exploratory Data Analysis (EDA).">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_parallel_coordinates_thumb.png
+    :alt: Parallel Coordinates
+
+  :ref:`sphx_glr_auto_examples_parallel_coordinates.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Parallel Coordinates</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates plotting errors / residuals.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_residuals_thumb.png
+    :alt: Plot Residuals
+
+  :ref:`sphx_glr_auto_examples_plot_residuals.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Plot Residuals</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using plotly in Sphinx is great to deliver interactivity in you documentation. However, if you&#x27;...">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_multi_plots_for_sphinx_thumb.png
+    :alt: Multi-Plots for Sphinx
+
+  :ref:`sphx_glr_auto_examples_multi_plots_for_sphinx.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multi-Plots for Sphinx</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Principal Component Analysis is a feature reduction (decomposition) technique that aims to maxi...">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_principal_components_thumb.png
+    :alt: Principal Component Analysis
+
+  :ref:`sphx_glr_auto_examples_principal_components.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Principal Component Analysis</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Comparing 1D datasets readily achieved by overlaying distributions, boxplots, etc. For multivar...">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_compare_datasets_thumb.png
+    :alt: Compare Multiple N-D datasets
+
+  :ref:`sphx_glr_auto_examples_compare_datasets.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Compare Multiple N-D datasets</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates the learning curve, which helps answer two questions:">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_learning_curve_thumb.png
+    :alt: Learning Curve
+
+  :ref:`sphx_glr_auto_examples_learning_curve.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Learning Curve</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows the use of a forest of trees to evaluate the importance of features on an ar...">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_forest_importances_thumb.png
+    :alt: Feature importances with a forest of trees
+
+  :ref:`sphx_glr_auto_examples_plot_forest_importances.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Feature importances with a forest of trees</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Mahalanobis Distance can be used to detect outliers in multivariate space. This can be combined...">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_outlier_detection_thumb.png
+    :alt: Multivariate Outlier Detection
+
+  :ref:`sphx_glr_auto_examples_outlier_detection.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multivariate Outlier Detection</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="It is common to model across estimation domains using categorical features. This example demons...">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_category_feature_analysis_thumb.png
+    :alt: Category Feature Analysis
+
+  :ref:`sphx_glr_auto_examples_category_feature_analysis.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Category Feature Analysis</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates a model selection plot using cross validation.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_model_selection_thumb.png
+    :alt: Model Selection
+
+  :ref:`sphx_glr_auto_examples_model_selection.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Model Selection</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="There are times when the modeller or subject-matter expert feels the need to test estimation do...">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_partition_regressor_thumb.png
+    :alt: Partition Estimator
+
+  :ref:`sphx_glr_auto_examples_partition_regressor.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Partition Estimator</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/parallel_coordinates
+   /auto_examples/plot_residuals
+   /auto_examples/multi_plots_for_sphinx
+   /auto_examples/principal_components
+   /auto_examples/compare_datasets
+   /auto_examples/learning_curve
+   /auto_examples/plot_forest_importances
+   /auto_examples/outlier_detection
+   /auto_examples/category_feature_analysis
+   /auto_examples/model_selection
+   /auto_examples/partition_regressor
+
+
+.. only:: html
+
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
+
+    .. container:: sphx-glr-download sphx-glr-download-python
+
+      :download:`Download all examples in Python source code: auto_examples_python.zip </auto_examples/auto_examples_python.zip>`
+
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download all examples in Jupyter notebooks: auto_examples_jupyter.zip </auto_examples/auto_examples_jupyter.zip>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

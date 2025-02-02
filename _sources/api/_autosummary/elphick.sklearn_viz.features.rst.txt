@@ -1,0 +1,35 @@
+﻿elphick.sklearn\_viz.features
+=============================
+
+.. automodule:: elphick.sklearn_viz.features
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   elphick.sklearn_viz.features.importance
+   elphick.sklearn_viz.features.outlier_detection
+   elphick.sklearn_viz.features.parallel_coordinates
+   elphick.sklearn_viz.features.principal_components
+   elphick.sklearn_viz.features.scatter_matrix
+

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elphick.sklearn_viz.model_selection.metrics &mdash; sklearn-viz  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            sklearn-viz
+          </a>
+              <div class="version">
+                0.6.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../auto_examples/index.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license/license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">sklearn-viz</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">elphick.sklearn_viz.model_selection.metrics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for elphick.sklearn_viz.model_selection.metrics</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sklearn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">r2_score</span><span class="p">,</span> <span class="n">mean_absolute_error</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">f1_score</span>
+
+
+<div class="viewcode-block" id="mean_error"><a class="viewcode-back" href="../../../../api/_autosummary/elphick.sklearn_viz.model_selection.metrics.mean_error.html#elphick.sklearn_viz.model_selection.metrics.mean_error">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">mean_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y_est</span> <span class="o">-</span> <span class="n">y_true</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="rmse"><a class="viewcode-back" href="../../../../api/_autosummary/elphick.sklearn_viz.model_selection.metrics.rmse.html#elphick.sklearn_viz.model_selection.metrics.rmse">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">__version__</span> <span class="o">&gt;=</span> <span class="s1">&#39;1.4&#39;</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">root_mean_squared_error</span>
+        <span class="k">return</span> <span class="n">root_mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mse</span> <span class="o">=</span> <span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="moe_95"><a class="viewcode-back" href="../../../../api/_autosummary/elphick.sklearn_viz.model_selection.metrics.moe_95.html#elphick.sklearn_viz.model_selection.metrics.moe_95">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">moe_95</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;moe&quot;</span><span class="p">,</span> <span class="s2">&quot;lo&quot;</span><span class="p">,</span> <span class="s2">&quot;hi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;moe&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">me</span> <span class="o">=</span> <span class="n">mean_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">)</span>
+    <span class="n">rmse_value</span> <span class="o">=</span> <span class="n">rmse</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;lo&#39;</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">me</span> <span class="o">-</span> <span class="p">(</span><span class="n">rmse_value</span> <span class="o">*</span> <span class="mf">1.96</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;hi&#39;</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">me</span> <span class="o">+</span> <span class="p">(</span><span class="n">rmse_value</span> <span class="o">*</span> <span class="mf">1.96</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;moe&#39;</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">me</span> <span class="o">-</span> <span class="p">(</span><span class="n">rmse_value</span> <span class="o">*</span> <span class="mf">1.96</span><span class="p">))),</span> <span class="p">(</span><span class="n">me</span> <span class="o">+</span> <span class="p">(</span><span class="n">rmse_value</span> <span class="o">*</span> <span class="mf">1.96</span><span class="p">))])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid metric supplied.  Allowed values are: </span><span class="si">{</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;moe&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;lo&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;hi&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="r2"><a class="viewcode-back" href="../../../../api/_autosummary/elphick.sklearn_viz.model_selection.metrics.r2.html#elphick.sklearn_viz.model_selection.metrics.r2">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">r2</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">):</span>
+    <span class="n">ssr</span> <span class="o">=</span> <span class="p">((</span><span class="n">y_true</span> <span class="o">-</span> <span class="n">y_est</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">sst</span> <span class="o">=</span> <span class="p">((</span><span class="n">y_true</span> <span class="o">-</span> <span class="n">y_true</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">ssr</span> <span class="o">/</span> <span class="n">sst</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="r2_with_nan"><a class="viewcode-back" href="../../../../api/_autosummary/elphick.sklearn_viz.model_selection.metrics.r2_with_nan.html#elphick.sklearn_viz.model_selection.metrics.r2_with_nan">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">r2_with_nan</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_est</span><span class="p">):</span>
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">y_true</span> <span class="o">-</span> <span class="n">y_est</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">denominator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">y_true</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span><span class="p">)</span></div>
+
+
+<span class="n">regression_metrics</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># &#39;r2_nan&#39;: r2_with_nan,</span>
+    <span class="s1">&#39;r2_score&#39;</span><span class="p">:</span> <span class="n">r2_score</span><span class="p">,</span>
+    <span class="s1">&#39;me&#39;</span><span class="p">:</span> <span class="n">mean_error</span><span class="p">,</span>
+    <span class="s1">&#39;r2&#39;</span><span class="p">:</span> <span class="n">r2</span><span class="p">,</span>
+    <span class="s1">&#39;mae&#39;</span><span class="p">:</span> <span class="n">mean_absolute_error</span><span class="p">,</span>
+    <span class="s1">&#39;mse&#39;</span><span class="p">:</span> <span class="n">mean_squared_error</span><span class="p">,</span>
+    <span class="s1">&#39;rmse&#39;</span><span class="p">:</span> <span class="n">rmse</span><span class="p">,</span>
+    <span class="s1">&#39;moe&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">moe_95</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;moe&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;moe_lo&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">moe_95</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;lo&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;moe_hi&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">moe_95</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;hi&#39;</span><span class="p">)}</span>
+
+<span class="n">classification_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;f1&#39;</span><span class="p">:</span> <span class="n">f1_score</span><span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Greg Elphick.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

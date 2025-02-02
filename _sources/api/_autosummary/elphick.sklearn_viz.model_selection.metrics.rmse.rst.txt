@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.model\_selection.metrics.rmse
+==================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.metrics
+
+.. autofunction:: rmse

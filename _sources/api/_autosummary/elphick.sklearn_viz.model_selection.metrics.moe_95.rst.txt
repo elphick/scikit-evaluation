@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.model\_selection.metrics.moe\_95
+=====================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.metrics
+
+.. autofunction:: moe_95

@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.features.outlier\_detection.plot\_outlier\_matrix
+======================================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.outlier_detection
+
+.. autofunction:: plot_outlier_matrix

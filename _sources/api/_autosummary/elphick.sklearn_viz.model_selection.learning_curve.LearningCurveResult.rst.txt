@@ -1,0 +1,37 @@
+elphick.sklearn\_viz.model\_selection.learning\_curve.LearningCurveResult
+=========================================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.learning_curve
+
+.. autoclass:: LearningCurveResult
+   :members:
+   :special-members: __add__, __mul__
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LearningCurveResult.__init__
+      ~LearningCurveResult.get_metric_results
+      ~LearningCurveResult.get_plot_data
+      ~LearningCurveResult.get_results
+      ~LearningCurveResult.get_scorer_results
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LearningCurveResult.metrics
+      ~LearningCurveResult.training_scores
+      ~LearningCurveResult.validation_scores
+      ~LearningCurveResult.training_sizes
+   
+   

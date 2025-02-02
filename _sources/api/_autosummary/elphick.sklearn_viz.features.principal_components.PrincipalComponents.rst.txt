@@ -1,0 +1,35 @@
+elphick.sklearn\_viz.features.principal\_components.PrincipalComponents
+=======================================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.principal_components
+
+.. autoclass:: PrincipalComponents
+   :members:
+   :special-members: __add__, __mul__
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PrincipalComponents.__init__
+      ~PrincipalComponents.add_loading_vectors
+      ~PrincipalComponents.plot_explained_variance
+      ~PrincipalComponents.plot_loading_vectors
+      ~PrincipalComponents.plot_principal_components
+      ~PrincipalComponents.plot_scatter_matrix
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PrincipalComponents.data
+   
+   

@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.features.principal\_components.plot\_principal\_components
+===============================================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.principal_components
+
+.. autofunction:: plot_principal_components

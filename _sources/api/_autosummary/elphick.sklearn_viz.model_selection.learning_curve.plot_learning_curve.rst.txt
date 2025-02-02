@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.model\_selection.learning\_curve.plot\_learning\_curve
+===========================================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.learning_curve
+
+.. autofunction:: plot_learning_curve

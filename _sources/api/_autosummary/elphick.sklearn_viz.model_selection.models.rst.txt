@@ -1,0 +1,32 @@
+elphick.sklearn\_viz.model\_selection.models
+============================================
+
+.. automodule:: elphick.sklearn_viz.model_selection.models
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Model
+      ModelType
+      Models
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,39 @@
+elphick.sklearn\_viz.model\_selection.model\_selection
+======================================================
+
+.. automodule:: elphick.sklearn_viz.model_selection.model_selection
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+   
+      plot_model_selection
+      subplot_index
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      ModelSelection
+   
+   
+
+   
+   
+   
+
+
+

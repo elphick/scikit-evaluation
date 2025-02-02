@@ -1,0 +1,31 @@
+elphick.sklearn\_viz.model\_selection.scorers
+=============================================
+
+.. automodule:: elphick.sklearn_viz.model_selection.scorers
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+   
+      r2_score_with_nan
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

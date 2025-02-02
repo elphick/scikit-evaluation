@@ -1,0 +1,28 @@
+elphick.sklearn\_viz.model\_selection.models.Models
+===================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.models
+
+.. autoclass:: Models
+   :members:
+   :special-members: __add__, __mul__
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Models.__init__
+      ~Models.all_classifiers
+      ~Models.all_regressors
+      ~Models.fast_classifiers
+      ~Models.fast_regressors
+   
+   
+
+   
+   
+   

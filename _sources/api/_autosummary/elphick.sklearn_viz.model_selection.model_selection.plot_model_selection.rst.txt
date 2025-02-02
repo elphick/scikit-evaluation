@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.model\_selection.model\_selection.plot\_model\_selection
+=============================================================================
+
+.. currentmodule:: elphick.sklearn_viz.model_selection.model_selection
+
+.. autofunction:: plot_model_selection

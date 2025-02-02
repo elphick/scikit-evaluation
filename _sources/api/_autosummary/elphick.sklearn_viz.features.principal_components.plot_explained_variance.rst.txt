@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.features.principal\_components.plot\_explained\_variance
+=============================================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.principal_components
+
+.. autofunction:: plot_explained_variance

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>elphick.sklearn_viz.features.principal_components.plot_loading_vectors &mdash; sklearn-viz  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="elphick.sklearn_viz.features.principal_components.plot_principal_components" href="elphick.sklearn_viz.features.principal_components.plot_principal_components.html" />
+    <link rel="prev" title="elphick.sklearn_viz.features.principal_components.plot_explained_variance" href="elphick.sklearn_viz.features.principal_components.plot_explained_variance.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            sklearn-viz
+          </a>
+              <div class="version">
+                0.6.9
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../usage/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Example Gallery</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="elphick.sklearn_viz.features.html">elphick.sklearn_viz.features</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="elphick.sklearn_viz.features.importance.html">elphick.sklearn_viz.features.importance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elphick.sklearn_viz.features.outlier_detection.html">elphick.sklearn_viz.features.outlier_detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="elphick.sklearn_viz.features.parallel_coordinates.html">elphick.sklearn_viz.features.parallel_coordinates</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="elphick.sklearn_viz.features.principal_components.html">elphick.sklearn_viz.features.principal_components</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="elphick.sklearn_viz.features.principal_components.plot_correlation_circle.html">elphick.sklearn_viz.features.principal_components.plot_correlation_circle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="elphick.sklearn_viz.features.principal_components.plot_explained_variance.html">elphick.sklearn_viz.features.principal_components.plot_explained_variance</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">elphick.sklearn_viz.features.principal_components.plot_loading_vectors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="elphick.sklearn_viz.features.principal_components.plot_principal_components.html">elphick.sklearn_viz.features.principal_components.plot_principal_components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="elphick.sklearn_viz.features.principal_components.plot_scatter_matrix.html">elphick.sklearn_viz.features.principal_components.plot_scatter_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="elphick.sklearn_viz.features.principal_components.PCResults.html">elphick.sklearn_viz.features.principal_components.PCResults</a></li>
+<li class="toctree-l4"><a class="reference internal" href="elphick.sklearn_viz.features.principal_components.PrincipalComponents.html">elphick.sklearn_viz.features.principal_components.PrincipalComponents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="elphick.sklearn_viz.features.scatter_matrix.html">elphick.sklearn_viz.features.scatter_matrix</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="elphick.sklearn_viz.model_selection.html">elphick.sklearn_viz.model_selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="elphick.sklearn_viz.residuals.html">elphick.sklearn_viz.residuals</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license/license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">sklearn-viz</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../modules.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="elphick.sklearn_viz.features.html">elphick.sklearn_viz.features</a></li>
+          <li class="breadcrumb-item"><a href="elphick.sklearn_viz.features.principal_components.html">elphick.sklearn_viz.features.principal_components</a></li>
+      <li class="breadcrumb-item active">elphick.sklearn_viz.features.principal_components.plot_loading_vectors</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/_autosummary/elphick.sklearn_viz.features.principal_components.plot_loading_vectors.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="elphick-sklearn-viz-features-principal-components-plot-loading-vectors">
+<h1>elphick.sklearn_viz.features.principal_components.plot_loading_vectors<a class="headerlink" href="#elphick-sklearn-viz-features-principal-components-plot-loading-vectors" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="elphick.sklearn_viz.features.principal_components.plot_loading_vectors">
+<span class="sig-prename descclassname"><span class="pre">elphick.sklearn_viz.features.principal_components.</span></span><span class="sig-name descname"><span class="pre">plot_loading_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardised</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/elphick/sklearn_viz/features/principal_components.html#plot_loading_vectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#elphick.sklearn_viz.features.principal_components.plot_loading_vectors" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code>) – X values to transform and plot.</p></li>
+<li><p><strong>color</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Series</span></code>]) – optional series by which to color the markers</p></li>
+<li><p><strong>standardised</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True, plot the standardised PCA, where vectors are transformed to zero mean and
+unit variance.</p></li>
+<li><p><strong>title</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Optional plot title</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a plotly GraphObjects.Figure</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="elphick.sklearn_viz.features.principal_components.plot_explained_variance.html" class="btn btn-neutral float-left" title="elphick.sklearn_viz.features.principal_components.plot_explained_variance" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="elphick.sklearn_viz.features.principal_components.plot_principal_components.html" class="btn btn-neutral float-right" title="elphick.sklearn_viz.features.principal_components.plot_principal_components" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Greg Elphick.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+elphick.sklearn\_viz.features.importance
+========================================
+
+.. automodule:: elphick.sklearn_viz.features.importance
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+   
+      plot_feature_importance
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      FeatureImportance
+   
+   
+
+   
+   
+   
+
+
+

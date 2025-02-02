@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.features.parallel\_coordinates.plot\_parallel\_coordinates
+===============================================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.parallel_coordinates
+
+.. autofunction:: plot_parallel_coordinates

@@ -1,0 +1,6 @@
+elphick.sklearn\_viz.features.principal\_components.plot\_correlation\_circle
+=============================================================================
+
+.. currentmodule:: elphick.sklearn_viz.features.principal_components
+
+.. autofunction:: plot_correlation_circle
