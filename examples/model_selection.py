@@ -2,7 +2,7 @@
 Model Selection
 ===============
 
-This example demonstrates a model selection plot incorporating cross validation and test error.
+This example demonstrates a model selection plot using cross validation.
 
 Code has been adapted from the
 `machinelearningmastery example <https://machinelearningmastery.com/compare-machine-learning-algorithms-python-scikit-learn/>`_

@@ -3,7 +3,7 @@ import sys
 
 import plotly
 from plotly.io._sg_scraper import plotly_sg_scraper
-
+from elphick import sklearn_viz
 image_scrapers = ('matplotlib', plotly_sg_scraper,)
 
 from plotly.io._sg_scraper import plotly_sg_scraper
@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'sklearn-viz'
 copyright = '2023, Greg Elphick'
 author = 'Greg Elphick'
+version = sklearn_viz.__version__
 
 # -- General configuration ---------------------------------------------------
 

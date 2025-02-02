@@ -1,3 +1,13 @@
+Sklearn_Viz 0.6.9 (2025-02-02)
+==============================
+
+Bugfixes
+--------
+
+- PartitionEstimator fix - is_regressor(mdl) now returns True for scikit-learn>=1.6 (#61)
+- Plotly color fix (#62)
+
+
 Sklearn_Viz 0.6.8 (2025-01-12)
 ======================================
 
