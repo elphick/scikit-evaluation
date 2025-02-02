@@ -16,7 +16,6 @@ import plotly
 import sklearn
 from sklearn.compose import ColumnTransformer
 from sklearn.datasets import load_diabetes
-from sklearn.metrics import mean_squared_error
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
@@ -62,7 +61,7 @@ models_to_test: Dict = {'LR': sklearn.linear_model.LinearRegression(),
 ms: ModelSelection = ModelSelection(estimators=models_to_test, datasets=xy, target='progression', pre_processor=pp,
                                     k_folds=10, scorer='r2', group=group,
                                     metrics={'r2_score': metrics.r2_score, 'moe': metrics.moe_95,
-                                             'rmse': partial(mean_squared_error, squared=False),
+                                             'rmse': metrics.rmse,
                                              'me': metrics.mean_error},
                                     random_state=123)
 # %%

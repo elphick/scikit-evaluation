@@ -148,7 +148,7 @@ class ModelSelection(CrossValidatorBase):
         for col in data.columns:
             # For the scorer build the plot by column to color individually based on score
             median = np.median(data[col])  # find the median
-            color = 'rgb' + str(cmap(norm(median))[0:3])  # normalize
+            color = 'rgb' + str(tuple(int(c * 255) for c in cmap(norm(median))[0:3]))  # normalize
             fig.add_trace(go.Box(y=data[col], name=col, boxpoints='all', notched=True, fillcolor=color,
                                  line={"color": "grey"}, marker={"color": "grey"}, showlegend=False,
                                  offsetgroup='A'), row=1, col=1)

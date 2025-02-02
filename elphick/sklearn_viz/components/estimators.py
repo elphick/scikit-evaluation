@@ -2,8 +2,10 @@ from abc import ABC
 
 import numpy as np
 import pandas as pd
+import sklearn
 from sklearn.base import RegressorMixin, BaseEstimator, ClassifierMixin, clone
 from sklearn.exceptions import NotFittedError
+# from sklearn.utils import Tags, TargetTags
 from sklearn.utils._estimator_html_repr import _VisualBlock
 from sklearn.utils.validation import check_is_fitted
 from typing import Union, Optional
@@ -32,7 +34,7 @@ class PartitionEstimatorBase(BaseEstimator, ABC):
         self.x_train_ = X
         self.y_train_ = y if isinstance(y, pd.DataFrame) else y.to_frame()
         domain_indexes: dict = dict()
-        domains: pd.Series = pd.Series(np.nan, index=X.index, name='domains')
+        domains: pd.Series = pd.Series(np.nan, index=X.index, name='domains', dtype='object')
         for domain, criteria in self.partition_defs.items():
             mdl = [est[1] for est in self.estimators if est[0] == domain][0]
             xf = X.query(criteria)
@@ -87,6 +89,19 @@ class PartitionEstimatorBase(BaseEstimator, ABC):
 
         return self.estimators_[0].n_features_in_
 
+    def _more_tags(self):
+        return {'estimator_type': 'regressor', 'requires_fit': True}
+
+    if sklearn.__version__ >= '1.6.0':
+        def __sklearn_tags__(self):
+            from sklearn.utils import Tags, TargetTags
+            return Tags(estimator_type=None,
+                        target_tags=TargetTags(required=False),
+                        transformer_tags=None,
+                        regressor_tags=None,
+                        classifier_tags=None,
+                        )
+
     def _sk_visual_block_(self):
         names, estimators = zip(*self.estimators)
         criteria = list(self.partition_defs.values())
@@ -105,6 +120,7 @@ class PartitionRegressor(PartitionEstimatorBase, RegressorMixin):
         super().__init__(estimator, partition_defs=partition_defs, n_jobs=n_jobs, verbose=verbose)
         # set scorer for regression
         self.scorer_ = 'r2'
+        self._estimator_type = 'regressor'
 
     def fit(self, X: pd.DataFrame, y: Optional[pd.DataFrame] = None) -> 'PartitionRegressor':
         super().fit(X, y)
@@ -112,6 +128,12 @@ class PartitionRegressor(PartitionEstimatorBase, RegressorMixin):
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         return super().predict(X)
+
+    if sklearn.__version__ >= '1.6.0':
+        def __sklearn_tags__(self):
+            tags = super().__sklearn_tags__()
+            tags.estimator_type = 'regressor'
+            return tags
 
 
 class PartitionClassifier(PartitionEstimatorBase, ClassifierMixin):
@@ -126,6 +148,7 @@ class PartitionClassifier(PartitionEstimatorBase, ClassifierMixin):
         super().__init__(estimator, partition_defs=partition_defs, n_jobs=n_jobs, verbose=verbose)
         # set scorer for regression
         self.scorer_ = 'accuracy'
+        self._estimator_type = 'classifier'
 
     def fit(self, X: pd.DataFrame, y: Optional[pd.DataFrame] = None) -> 'PartitionClassifier':
         super().fit(X, y)
@@ -133,3 +156,9 @@ class PartitionClassifier(PartitionEstimatorBase, ClassifierMixin):
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         return super().predict(X)
+
+    if sklearn.__version__ >= '1.6.0':
+        def __sklearn_tags__(self):
+            tags = super().__sklearn_tags__()
+            tags.estimator_type = 'classifier'
+            return tags

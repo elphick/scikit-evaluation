@@ -211,8 +211,8 @@ class CrossValidatorBase(ABC):
                     # calculate the metric by each group in the group series.
                     y_est = pd.merge(left=pd.Series(y_est, name='y_est', index=x.index[test_indexes]),
                                      right=group, left_index=True, right_index=True)
-                    y_est_grouped = y_est.groupby([group.name])
-                    grouped_results = [y_est_grouped.get_group(x) for x in y_est_grouped.groups]
+                    y_est_grouped = y_est.groupby([group.name], observed=False)
+                    grouped_results = [y_est_grouped.get_group((x,)) for x in y_est_grouped.groups]
                     for grp_res in grouped_results:
                         group_value = str(grp_res[group.name].iloc[0])
                         group_metric_results = fn_metric(y_true[grp_res.index], grp_res['y_est'].values)

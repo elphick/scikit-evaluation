@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "sklearn-viz"
-version = "0.6.8"
-description = ""
+version = "0.6.9"
+description = "Interactive visualisation for scikit-learn models"
 
 authors = ["Greg <11791585+elphick@users.noreply.github.com>"]
 readme = "README.md"
@@ -21,8 +21,8 @@ filename = "HISTORY.rst"
 directory = "towncrier/newsfragments"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
-scikit-learn = ">=1.2.0"
+python = ">=3.9,<3.14"
+scikit-learn = ">=1.2"
 pandas = ">=1.3.0"
 matplotlib = ">=3.3"
 plotly = "^5.15.0"
@@ -37,6 +37,7 @@ sphinx-autodoc-typehints = "^1.18.3"
 myst-parser = "^0.18.0"
 kaleido = "0.2.1"  # For plotly thumbnails
 towncrier = "^23.11.0"
+tox = "^4.24.1"
 
 [build-system]
 requires = ["poetry-core"]

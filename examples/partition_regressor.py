@@ -22,7 +22,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.utils.validation import check_is_fitted
 
 from elphick.sklearn_viz.components.estimators import PartitionRegressor
-from elphick.sklearn_viz.features import plot_feature_importance
+from elphick.sklearn_viz.features import plot_feature_importance, OutlierDetection
 from elphick.sklearn_viz.model_selection import ModelSelection
 
 # %%
@@ -32,6 +32,24 @@ from elphick.sklearn_viz.model_selection import ModelSelection
 # The California housing dataset will be loaded to demonstrate the regression.
 
 x, y = fetch_california_housing(return_X_y=True, as_frame=True)
+
+# %%
+# Remove Outliers
+# ---------------
+
+# We will remove the outliers from the dataset.  This is not a necessary step, but it will help to
+# demonstrate the partitioning.
+
+od: OutlierDetection = OutlierDetection(x=x, pca_spec=2)
+detected_outliers: pd.Series = od.data['outlier']
+
+x = x.query('@detected_outliers == False')
+y = y.loc[x.index]
+
+# %%
+# Split the data
+# --------------
+
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 xy_train: pd.DataFrame = pd.concat([x_train, y_train], axis=1)
 
@@ -60,6 +78,7 @@ pp: Pipeline = make_pipeline(preprocessor).set_output(transform='pandas')
 # Baseline Model
 # ~~~~~~~~~~~~~~
 #
+
 # The baseline model will simply be fitted as normal - no partitions will be applied.
 
 base_mdl: Pipeline = make_pipeline(pp, LinearRegression())
@@ -129,7 +148,7 @@ ms: ModelSelection = ModelSelection(estimators={'base-model': base_mdl,
                                                 'partition-model': partition_mdl},
                                     datasets=xy_train,
                                     target='MedHouseVal',
-                                    group=partition_mdl[-1].domains_, random_state=1234)
+                                    group=partition_mdl[-1].domains_, random_state=123)
 fig = ms.plot(show_group=True, metrics=['r2_score'])
 fig.update_layout(height=600)
 plotly.io.show(fig)
@@ -144,9 +163,9 @@ partition_mdl[-1].domains_.value_counts()
 #
 # .. note::
 #
-#    1. In this case the partitioning caused the model performance to deteriorate.
+#    1. In this case the partitioning did not deliver any statistically significant improvement, but a directional improvement.
 #    2. It appears that (for the small class) the error margins are wider for the partitioned model,
-#       likely caused by lower sample count in the fitted model.
+#       caused by lower sample count for that class in the fitted model.
 
 # %%
 # Feature Importance
