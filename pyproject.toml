@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sklearn-viz"
-version = "0.6.9"
+version = "0.6.10"
 description = "Interactive visualisation for scikit-learn models"
 
 authors = ["Greg <11791585+elphick@users.noreply.github.com>"]
@@ -17,8 +17,17 @@ bump-version = "scripts.bump_version:main"
 [tool.towncrier]
 package = "elphick.sklearn_viz"
 package_dir = "elphick/sklearn_viz"
-filename = "HISTORY.rst"
+filename = "CHANGELOG.rst"
 directory = "towncrier/newsfragments"
+[tool.towncrier.fragment.feature]
+[tool.towncrier.fragment.bugfix]
+[tool.towncrier.fragment.doc]
+[tool.towncrier.fragment.removal]
+[tool.towncrier.fragment.misc]
+
+[tool.towncrier.fragment.maint]
+name = "Other Tasks"
+showcontent = true
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.14"
